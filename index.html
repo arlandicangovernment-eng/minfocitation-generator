@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MINFO Citation Generator</title>
+    <style>
+    body { 
+        font-family: Arial, sans-serif;
+        margin: 0;                  
+        padding: 40px;               
+        background-color: #ffffff;
+        color: #333; 
+    }
+    header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        margin-bottom: 20px; 
+    }
+    .logo {
+        width: 80px;
+        height: auto;
+        border-radius: 4px;
+        margin-bottom: 15px; 
+    }
+    .header-text {
+        text-align: center;
+    }
+    .header-text h1 {
+        margin: 0;
+        font-size: 28px;
+    }
+    .header-text p {
+        margin: 5px 0 0 0;
+        color: #666;
+    }
+    .nav-bar {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        max-width: 600px;
+        margin: 0 auto 25px auto;
+    }
+    .nav-btn {
+        background-color: #e2e8f0;
+        color: #334155;
+        border: none;
+        padding: 8px 16px;
+        font-size: 14px;
+        font-weight: bold;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .nav-btn:hover {
+        background-color: #cbd5e1;
+    }
+    .nav-btn.active {
+        background-color: #007bff;
+        color: white;
+    }
+    .container { max-width: 600px; margin: 0 auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 10px #0000001a; }
+    .content-panel {
+        display: none;
+    }
+    .content-panel.active {
+        display: block;
+    }
+    .section { margin-bottom: 20px; }
+    label { font-weight: bold; display: block; margin-bottom: 5px; }
+    input[type="text"], input[type="file"], select, textarea { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+    button { background-color: #007bff; color: white; border: none; padding: 12px 20px; font-size: 16px; border-radius: 4px; cursor: pointer; width: 100%; }
+    button:hover { background-color: #0056b3; }
+    #result-box { margin-top: 20px; padding: 15px; background-color: #f8f8f8; border-left: 5px solid #2c92ff; border-radius: 4px; display: none; }
+    h2 {
+        margin-top: 0;
+        color: #007bff;
+        font-size: 22px;
+        border-bottom: 2px solid #f3f3f3;
+        padding-bottom: 8px;
+    }
+    p {
+        line-height: 1.6;
+        color: #475569;
+    }
+    .team-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 15px 0;
+    }
+    .avatar-placeholder {
+        width: 90px;
+        height: 90px;
+        background-color: #cbd5e1;
+        border-radius: 50%;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        color: #64748b;
+        font-weight: bold;
+    }
+    .step-block {
+        margin-bottom: 18px;
+    }
+    .step-title {
+        font-weight: bold;
+        color: #1e293b;
+        margin-bottom: 4px;
+    }
+    .contact-link {
+        display: inline-block;
+        background-color: #f1f5f9;
+        color: #007bff;
+        padding: 10px 16px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: bold;
+        margin-right: 10px;
+        margin-bottom: 10px;
+        transition: background 0.2s;
+    }
+    .contact-link:hover {
+        background-color: #e2e8f0;
+    }
+
+    [hidden] { display: none !important; }
+    input[type="date"] { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-family: inherit; font-size: inherit; }
+    button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #007bff; outline-offset: 2px; }
+    .row { display: flex; gap: 10px; }
+    .row > div { flex: 1; min-width: 0; }
+    .author-row { display: flex; gap: 8px; align-items: flex-start; }
+    .author-row input[type="text"] { margin-bottom: 8px; }
+    .author-row .btn-remove { padding: 10px 12px; }
+    .btn-small { width: auto; padding: 8px 14px; font-size: 14px; background-color: #e2e8f0; color: #334155; }
+    .btn-small:hover { background-color: #cbd5e1; }
+    .hint { display: block; font-size: 12px; color: #64748b; margin: 6px 0 15px 0; line-height: 1.4; }
+    .citation { background: white; padding: 10px 10px 10px 2.5em; text-indent: -1.5em; border: 1px dashed #bbb; line-height: 1.6; margin-bottom: 10px; }
+    .citation.citation-card { padding-left: 10px; text-indent: 0; }
+    .aacr2-heading { margin-bottom: 4px; }
+    .aacr2-body { margin-left: 1.5em; }
+    .tips { background: #fff8e1; border-left: 4px solid #f59e0b; padding: 8px 12px; font-size: 13px; color: #78350f; margin-top: 12px; border-radius: 4px; }
+    .notes { font-size: 13px; color: #475569; margin: 0; padding-left: 18px; line-height: 1.5; }
+    @media (max-width: 480px) {
+        body { padding: 20px 12px; }
+        .row { flex-wrap: wrap; gap: 0; }
+        .row > div { flex-basis: 100%; }
+    }
+    </style>
+</head>
+<body>
+
+<header>
+<img src="https://drive.google.com/thumbnail?id=1LCybX4v8Bkytw1azbj4I0lu39ulft7-_&amp;sz=w300" data-fallbacks="https://lh3.googleusercontent.com/d/1LCybX4v8Bkytw1azbj4I0lu39ulft7-_|logo.png" onerror="imgFallback(this)" alt="MINFO Logo" class="logo">
+    
+    <div class="header-text">
+        <h1>MINFO Citation Generator</h1>
+        <p>Free Accurate Academic Citation</p>
+    </div>
+</header>
+
+<div class="nav-bar">
+    <button class="nav-btn active" onclick="switchTab('generator-panel', this)">Generator</button>
+    <button class="nav-btn" onclick="switchTab('about-panel', this)">About</button>
+    <button class="nav-btn" onclick="switchTab('team-panel', this)">Team</button>
+    <button class="nav-btn" onclick="switchTab('findout-panel', this)">Find Out</button>
+    <button class="nav-btn" onclick="switchTab('contact-panel', this)">Contact</button>
+</div>
+
+<div class="container">
+
+    <div id="generator-panel" class="content-panel active">
+        <div class="section">
+            <label for="style-select">Choose Citation Style:</label>
+            <select id="style-select" onchange="updateForm()"></select>
+        </div>
+
+        <div class="section">
+            <label for="f-type">Source Type:</label>
+            <select id="f-type" onchange="updateForm()">
+                <option value="book">Book</option>
+                <option value="journal">Journal article</option>
+                <option value="website">Website / web page</option>
+            </select>
+            <span class="hint" id="type-hint" hidden>AACR2 describes books only, so the source type is set to Book.</span>
+        </div>
+
+        <div class="section">
+            <label>Author(s)</label>
+            <div id="author-list"></div>
+            <button type="button" class="btn-small" onclick="addAuthorRow()">+ Add author</button>
+            <span class="hint">Type the surname and given names in separate boxes. For an organization, type its name in the first box and leave the second empty. No author? Leave them all blank.</span>
+        </div>
+
+        <div class="section">
+            <label for="f-title" id="title-label">Book title</label>
+            <input type="text" id="f-title" placeholder="Type the title as it appears on the source">
+        </div>
+
+        <div data-types="journal">
+            <label for="f-journal">Journal name</label>
+            <input type="text" id="f-journal" placeholder="e.g., Journal of Library Science">
+        </div>
+
+        <div data-types="website">
+            <label for="f-site">Website name (optional)</label>
+            <input type="text" id="f-site" placeholder="e.g., World Health Organization">
+        </div>
+
+        <div data-types="book">
+            <div class="row">
+                <div>
+                    <label for="f-edition">Edition (optional)</label>
+                    <input type="text" id="f-edition" placeholder="e.g., 2">
+                </div>
+                <div>
+                    <label for="f-year-b">Year</label>
+                    <input type="text" id="f-year-b" placeholder="e.g., 2024" inputmode="numeric">
+                </div>
+            </div>
+            <div class="row">
+                <div>
+                    <label for="f-place">Place of publication</label>
+                    <input type="text" id="f-place" placeholder="e.g., Sample City">
+                </div>
+                <div>
+                    <label for="f-publisher">Publisher</label>
+                    <input type="text" id="f-publisher" placeholder="e.g., Sample Publisher">
+                </div>
+            </div>
+            <span class="hint">The place is used by Chicago, Harvard, IEEE, Vancouver and AACR2. APA, MLA and AMA leave it out.</span>
+        </div>
+
+        <div data-types="journal">
+            <div class="row">
+                <div>
+                    <label for="f-year-j">Year</label>
+                    <input type="text" id="f-year-j" placeholder="e.g., 2023" inputmode="numeric">
+                </div>
+                <div>
+                    <label for="f-volume">Volume</label>
+                    <input type="text" id="f-volume" placeholder="e.g., 12">
+                </div>
+                <div>
+                    <label for="f-issue">Issue</label>
+                    <input type="text" id="f-issue" placeholder="e.g., 3">
+                </div>
+            </div>
+            <label for="f-pages">Pages</label>
+            <input type="text" id="f-pages" placeholder="e.g., 123-129">
+        </div>
+
+        <div data-types="website">
+            <div class="row">
+                <div>
+                    <label for="f-pubdate">Date published (optional)</label>
+                    <input type="date" id="f-pubdate">
+                </div>
+                <div>
+                    <label for="f-accessed">Date accessed (optional)</label>
+                    <input type="date" id="f-accessed">
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <label for="f-link" id="link-label">Link or DOI (optional)</label>
+            <input type="text" id="f-link" placeholder="Paste the web link or DOI here, if there is one">
+            <span class="hint" style="margin-top: -8px;">A link is the web address of the source (it starts with https://). A DOI is a code like 10.1000/xyz123, usually printed on journal articles.</span>
+        </div>
+
+        <div data-style="aacr2">
+            <div class="row">
+                <div>
+                    <label for="f-extent">Extent (optional)</label>
+                    <input type="text" id="f-extent" placeholder="e.g., 250 p.">
+                </div>
+                <div>
+                    <label for="f-size">Size (optional)</label>
+                    <input type="text" id="f-size" placeholder="e.g., 24 cm">
+                </div>
+            </div>
+            <div class="row">
+                <div>
+                    <label for="f-series">Series (optional)</label>
+                    <input type="text" id="f-series" placeholder="e.g., Library science series ; 5">
+                </div>
+                <div>
+                    <label for="f-isbn">ISBN (optional)</label>
+                    <input type="text" id="f-isbn" placeholder="e.g., 9781234567890">
+                </div>
+            </div>
+        </div>
+
+        <button type="button" onclick="generateCitation()">Process Now</button>
+
+        <div id="result-box" aria-live="polite"></div>
+    </div>
+
+    <div id="about-panel" class="content-panel">
+        <h2>About MINFO</h2>
+        <p>MINFO Citation Generator is a free citation tool that helps users create accurate and properly formatted citations with ease. A Quick Cite Tool (QCT), the name “MINFO” comes from “Mi,” meaning “me,” and “Info,” which is shortened from “information,” 
+        reflecting a personal and accessible approach to managing academic sources. MINFO may also come from the Ministry of Information (MINFO), a cabinet ministry of the micronational government of the <a href="https://arlandicangovernme.wixsite.com/arlandicangovernment" target="_blank" rel="noopener">Kingdom of Arlandica</a>, a nation-building project. The website is built entirely by students in <a href="https://en.wikipedia.org/wiki/Davao_City" target="_blank">Davao City</a>, <a href="https://en.wikipedia.org/wiki/Philippines" target="_blank">Philippines</a>, guided by the principle “By Students, For Students,” solidifying its focus on supporting learners in their academic work.</p>
+        <p>The platform is designed to be simple and user-friendly, allowing students to generate citations in different formats quickly without needing advanced knowledge of citation styles. It aims to reduce the time and effort required in formatting references, helping users focus more on their research and writing.</p>
+    </div>
+
+    <div id="team-panel" class="content-panel">
+        <h2>Our Team</h2>
+        <p>The team operating MINFO is dedicated to developing and maintaining the platform.</p>
+        <div class="team-card">
+            <img src="https://drive.google.com/thumbnail?id=1G2bKs4LDwgXpVMlFl6SuJoyEpgxKhR5c&amp;sz=w300" data-fallbacks="https://lh3.googleusercontent.com/d/1G2bKs4LDwgXpVMlFl6SuJoyEpgxKhR5c|jerold.jpg" onerror="imgFallback(this)" 
+                 alt="Garte, Jerold Jr. L." 
+                 style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin-bottom: 12px; border: 2px solid #e2e8f0;">
+                 
+            <div style="font-size: 18px; font-weight: bold; color: #1e293b; margin-bottom: 4px;">Garte, Jerold Jr. L.</div>
+            <div style="font-size: 14px; color: #475569;">2nd Year Student, Bachelor of Library and Information Science</div>
+            <div style="font-size: 14px; color: #64748b; font-style: italic;">University of Southeastern Philippines</div>
+        </div>
+    </div>
+
+    <div id="findout-panel" class="content-panel">
+        <h2>Find Out How to Use</h2>
+        
+        <div class="step-block">
+            <div class="step-title"><strong>Step 1: Choose Your Citation Style</strong></div>
+            <p>At the very top, click the dropdown menu under Choose Citation Style. Select the style required for your paper or project. It is currently set to APA 7th, but clicking it will likely reveal other common options like MLA, Chicago, or Harvard.</p>
+        </div>
+
+        <div class="step-block">
+            <div class="step-title"><strong>Step 2: Choose the Source Type and Fill In the Details</strong></div>
+            <p>Pick whether your source is a <strong>Book</strong>, a <strong>Journal article</strong>, or a <strong>Website</strong>. The form shows only the boxes that source needs. Fill in what you know and leave the rest blank.</p>
+            <p style="margin-left: 15px;"><strong>Authors</strong><br>
+            Type the surname in the first box and the given names in the second. Click "+ Add author" for more authors. For an organization, type its name in the first box and leave the second empty.</p>
+            <p style="margin-left: 15px;"><strong>Titles</strong><br>
+            Type the title as it appears on the source. The tool does not change capital letters, so follow the style's rule (for example, APA uses sentence case).</p>
+        </div>
+
+        <div class="step-block">
+            <div class="step-title"><strong>Step 3: Generate and Copy the Citation</strong></div>
+            <p>Click the large blue "Process Now" button at the bottom. Your citation appears below it, with italics where the style needs them. Click "Copy citation" to paste it into your paper, then read the short "Check before you submit" notes under the result.</p>
+        </div>
+    </div>
+
+    <div id="contact-panel" class="content-panel">
+        <h2>Contact Us & Feedback</h2>
+        <p>We value your thoughts! Please feel free to reach out via email using the options below:</p>
+        <div style="margin-top: 20px;">
+            <a href="mailto:jeroldgarte0@gmail.com" class="contact-link">Contact Us</a>
+            <a href="mailto:jeroldgarte0@gmail.com" class="contact-link">Write Your Feedback</a>
+        </div>
+    </div>
+
+</div>
+
+<script>
+function switchTab(panelId, btnElement) {
+    const panels = document.querySelectorAll('.content-panel');
+    panels.forEach(p => p.classList.remove('active'));
+
+    const buttons = document.querySelectorAll('.nav-btn');
+    buttons.forEach(b => b.classList.remove('active'));
+
+    document.getElementById(panelId).classList.add('active');
+    btnElement.classList.add('active');
+}
+
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MON_MLA = ['Jan.','Feb.','Mar.','Apr.','May','June','July','Aug.','Sept.','Oct.','Nov.','Dec.'];
+const MON_IEEE = ['Jan.','Feb.','Mar.','Apr.','May','Jun.','Jul.','Aug.','Sept.','Oct.','Nov.','Dec.'];
+const MON_3 = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const plainText = s => String(s).replace(/<[^>]*>/g, '').replace(/&[#a-z0-9]+;/gi, 'x');
+const em = s => s ? '<em>' + s + '</em>' : '';
+function end(s) {
+    if (!s) return '';
+    return /[.?!]$/.test(plainText(s).trim()) ? s : s + '.';
+}
+const join = arr => arr.filter(Boolean).join(' ');
+const linkOf = S => S.doi ? 'https://doi.org/' + S.doi : S.url;
+
+function ordinal(n) {
+    const s = ['th', 'st', 'nd', 'rd'], v = n % 100;
+    return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+function normEdition(e) {
+    e = (e || '').trim();
+    if (!e) return '';
+    e = e.replace(/[\s,.]*(edition|edn|ed)\.?$/i, '').trim();
+    if (/^(1|1st|first)$/i.test(e)) return '';
+    if (/^\d+$/.test(e)) return ordinal(+e);
+    return e;
+}
+function parseDate(s) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || '');
+    return m ? { y: +m[1], m: +m[2], d: +m[3] } : null;
+}
+function parseLink(s) {
+    s = (s || '').trim();
+    if (!s) return { doi: '', url: '' };
+    const m = s.match(/(?:doi\.org\/|doi:\s*|^)(10\.\d{4,9}\/\S+)$/i);
+    if (m) return { doi: m[1], url: '' };
+    if (!/^https?:\/\//i.test(s) && /^[\w-]+(\.[\w-]+)+/.test(s)) s = 'https://' + s;
+    return { doi: '', url: s };
+}
+
+const fmtUS   = D => !D ? '' : (D.m ? MONTHS[D.m - 1] + (D.d ? ' ' + D.d + ',' : '') + ' ' : '') + D.y;
+const fmtDMY  = D => !D ? '' : [D.d, D.m ? MONTHS[D.m - 1] : '', D.y].filter(Boolean).join(' ');
+const fmtMLA  = D => !D ? '' : [D.d, D.m ? MON_MLA[D.m - 1] : '', D.y].filter(Boolean).join(' ');
+const fmtAPA  = D => D.y + (D.m ? ', ' + MONTHS[D.m - 1] + (D.d ? ' ' + D.d : '') : '');
+const fmtIEEE = D => (D.m ? MON_IEEE[D.m - 1] + (D.d ? ' ' + D.d + ',' : '') + ' ' : '') + D.y;
+const fmtVan  = D => [D.y, D.m ? MON_3[D.m - 1] : '', D.m && D.d ? D.d : ''].filter(Boolean).join(' ');
+
+const isOrg = a => !a.given;
+const inv = a => isOrg(a) ? a.last : a.last + ', ' + a.given + (a.suffix ? ', ' + a.suffix : '');
+const nat = a => isOrg(a) ? a.last : a.given + ' ' + a.last + (a.suffix ? ', ' + a.suffix : '');
+function initialsGroups(given) {
+    return given.replace(/\./g, ' ').split(/\s+/).filter(Boolean)
+        .map(tok => tok.split('-').filter(Boolean).map(p => p.charAt(0).toUpperCase()));
+}
+const initDots  = g => initialsGroups(g).map(grp => grp.map(l => l + '.').join('-')).join(' ');
+const initPlain = g => initialsGroups(g).map(grp => grp.join('-')).join('');
+
+const pagesEn = p => p.replace(/(\w)\s*[-–—]\s*(\w)/g, '$1–$2');
+const pagesHy = p => p.replace(/\s*[–—]\s*/g, '-');
+const pp = p => /[-–—,]/.test(p) ? 'pp.' : 'p.';
+function shortRange(p) {
+    const m = /^(\d+)\s*[-–—]\s*(\d+)$/.exec(p);
+    if (!m) return pagesHy(p);
+    const a = m[1], b = m[2];
+    if (a.length !== b.length || +b <= +a) return a + '-' + b;
+    let i = 0;
+    while (i < a.length - 1 && a[i] === b[i]) i++;
+    return a + '-' + b.slice(i);
+}
+
+function apaNames(as) {
+    const f = a => isOrg(a) ? a.last : a.last + ', ' + initDots(a.given) + (a.suffix ? ', ' + a.suffix : '');
+    const n = as.length;
+    if (n === 1) return f(as[0]);
+    if (n === 2) return f(as[0]) + ', &amp; ' + f(as[1]);
+    if (n <= 20) return as.slice(0, -1).map(f).join(', ') + ', &amp; ' + f(as[n - 1]);
+    return as.slice(0, 19).map(f).join(', ') + ', . . . ' + f(as[n - 1]);
+}
+function apa7(S) {
+    const A = S.authors.length ? end(apaNames(S.authors)) : '';
+    const link = linkOf(S);
+    const date = '(' + (S.pub ? (S.type === 'website' ? fmtAPA(S.pub) : S.pub.y) : 'n.d.') + ').';
+    let parts;
+    if (S.type === 'book') {
+        const t = S.edition ? em(S.title) + ' (' + S.edition + ' ed.).' : end(em(S.title));
+        parts = [...(A ? [A, date, t] : [t, date]), end(S.publisher), link];
+    } else if (S.type === 'journal') {
+        const vol = S.volume ? ', ' + em(S.volume) + (S.issue ? '(' + S.issue + ')' : '') : '';
+        const src = em(S.journal) + vol + (S.pages ? ', ' + pagesEn(S.pages) : '') + '.';
+        const t = end(S.title);
+        parts = [...(A ? [A, date, t] : [t, date]), src, link];
+    } else {
+        const t = end(em(S.title));
+        const site = S.site && !(A && plainText(A).replace(/\.$/, '') === S.site) ? end(S.site) : '';
+        parts = [...(A ? [A, date, t] : [t, date]), site, link];
+    }
+    return join(parts);
+}
+
+function mlaNames(as) {
+    const n = as.length;
+    if (n === 1) return inv(as[0]);
+    if (n === 2) return inv(as[0]) + ', and ' + nat(as[1]);
+    return inv(as[0]) + ', et al';
+}
+function mla9(S) {
+    const link = S.doi ? 'https://doi.org/' + S.doi : (S.url ? S.url.replace(/^https?:\/\//i, '') : '');
+    let A = S.authors.length ? end(mlaNames(S.authors)) : '';
+    if (S.type === 'book') {
+        const els = [S.edition ? S.edition + ' ed.' : '', S.publisher, S.pub ? S.pub.y : '', link].filter(Boolean);
+        return join([A, end(em(S.title)), els.length ? end(els.join(', ')) : '']);
+    }
+    const t = '“' + end(S.title) + '”';
+    if (S.type === 'journal') {
+        const els = [em(S.journal), S.volume ? 'vol. ' + S.volume : '', S.issue ? 'no. ' + S.issue : '',
+                     S.pub ? S.pub.y : '', S.pages ? pp(S.pages) + ' ' + pagesEn(S.pages) : '', link].filter(Boolean);
+        return join([A, t, end(els.join(', '))]);
+    }
+    if (A && S.site && plainText(A).replace(/\.$/, '') === S.site) A = '';
+    const els = [em(S.site), S.pub ? fmtMLA(S.pub) : '', link].filter(Boolean);
+    return join([A, t, end(els.join(', ')), S.acc ? 'Accessed ' + fmtMLA(S.acc) + '.' : '']);
+}
+
+function chiNames(as) {
+    const n = as.length;
+    if (n === 1) return inv(as[0]);
+    if (n === 2) return inv(as[0]) + ', and ' + nat(as[1]);
+    if (n <= 10) return [inv(as[0]), ...as.slice(1, -1).map(nat)].join(', ') + ', and ' + nat(as[n - 1]);
+    return [inv(as[0]), ...as.slice(1, 7).map(nat)].join(', ') + ', et al';
+}
+function chicago17(S, authorDate) {
+    const link = linkOf(S);
+    const L = link ? end(link) : '';
+    const A = S.authors.length ? end(chiNames(S.authors)) : '';
+    const yr = S.pub ? S.pub.y : 'n.d.';
+    const ed = S.edition ? S.edition + ' ed.' : '';
+    const pubPlace = S.place && S.publisher ? S.place + ': ' + S.publisher : (S.publisher || S.place || '');
+    const lead = t => authorDate ? (A ? [A, end(yr), t] : [t, end(yr)]) : [A, t];
+
+    if (S.type === 'book') {
+        const t = end(em(S.title));
+        if (authorDate) return join([...lead(t), ed, pubPlace ? end(pubPlace) : '', L]);
+        const pubStr = [pubPlace, S.pub ? S.pub.y : ''].filter(Boolean).join(', ');
+        return join([...lead(t), ed, pubStr ? end(pubStr) : '', L]);
+    }
+    const t = '“' + end(S.title) + '”';
+    if (S.type === 'journal') {
+        const pg = S.pages ? ': ' + pagesEn(S.pages) : '';
+        const jr = authorDate
+            ? em(S.journal) + (S.volume ? ' ' + S.volume : '') + (S.issue ? ' (' + S.issue + ')' : '') + pg
+            : em(S.journal) + (S.volume ? ' ' + S.volume : '') + (S.issue ? ', no. ' + S.issue : '') + (S.pub ? ' (' + S.pub.y + ')' : '') + pg;
+        return join([...lead(t), end(jr), L]);
+    }
+    const acc = !S.pub && S.acc ? 'Accessed ' + fmtUS(S.acc) + '.' : '';
+    if (authorDate) {
+        const md = S.pub && S.pub.m && S.pub.d ? end(MONTHS[S.pub.m - 1] + ' ' + S.pub.d) : '';
+        return join([...lead(t), S.site ? end(S.site) : '', md, acc, L]);
+    }
+    return join([...lead(t), S.site ? end(S.site) : '', S.pub ? end(fmtUS(S.pub)) : acc, L]);
+}
+
+function harNames(as) {
+    const f = a => isOrg(a) ? a.last : a.last + ', ' + initDots(a.given);
+    const n = as.length;
+    if (n === 1) return f(as[0]);
+    if (n === 2) return f(as[0]) + ' and ' + f(as[1]);
+    if (n === 3) return f(as[0]) + ', ' + f(as[1]) + ' and ' + f(as[2]);
+    return f(as[0]) + ' et al.';
+}
+function harvard(S) {
+    const yr = S.pub ? S.pub.y : 'no date';
+    const link = linkOf(S);
+    const acc = S.acc ? ' (Accessed: ' + fmtDMY(S.acc) + ')' : '';
+    const A = S.authors.length ? harNames(S.authors) : (S.type === 'website' && S.site ? S.site : '');
+    const lead = (titleHtml) => A ? [A, '(' + yr + ')', titleHtml] : [em(S.title) + ' (' + yr + ')'];
+    if (S.type === 'book') {
+        const pubStr = S.place && S.publisher ? S.place + ': ' + S.publisher + '.' : end(S.publisher || S.place);
+        return join([...lead(end(em(S.title))), S.edition ? S.edition + ' edn.' : '', pubStr,
+                     link ? 'Available at: ' + link + '.' : '']);
+    }
+    if (S.type === 'journal') {
+        const t = '‘' + S.title.replace(/[.,]+$/, '') + '’,';
+        const src = em(S.journal) + ', ' + (S.volume || '') + (S.issue ? '(' + S.issue + ')' : '') +
+                    (S.pages ? ', ' + pp(S.pages) + ' ' + pagesEn(S.pages) : '') + '.';
+        const tail = S.doi ? 'https://doi.org/' + S.doi + '.' : (S.url ? 'Available at: ' + S.url + acc + '.' : '');
+        const head = A ? [A, '(' + yr + ')', t] : [t, '(' + yr + ')'];
+        return join([...head, src.replace(', ,', ','), tail]);
+    }
+    return join([...lead(end(em(S.title))), link ? 'Available at: ' + link + acc + '.' : '']);
+}
+
+function ieeeNames(as) {
+    const f = a => isOrg(a) ? a.last : initDots(a.given) + ' ' + a.last + (a.suffix ? ', ' + a.suffix : '');
+    const n = as.length;
+    if (n === 1) return f(as[0]);
+    if (n === 2) return f(as[0]) + ' and ' + f(as[1]);
+    if (n <= 6) return as.slice(0, -1).map(f).join(', ') + ', and ' + f(as[n - 1]);
+    return f(as[0]) + ' et al.';
+}
+function ieee(S) {
+    const A = S.authors.length ? ieeeNames(S.authors) : '';
+    const yr = S.pub ? S.pub.y : '';
+    if (S.type === 'book') {
+        const first = S.edition ? em(S.title) + ', ' + S.edition + ' ed.' : end(em(S.title));
+        const pubStr = (S.place ? S.place + ': ' : '') + S.publisher + (yr ? (S.publisher ? ', ' : '') + yr : '');
+        return join([A ? A + ',' : '', first, pubStr ? end(pubStr) : '']);
+    }
+    if (S.type === 'journal') {
+        const tt = '“' + S.title.replace(/[.,]+$/, '') + ',”';
+        const els = [em(S.journal), S.volume ? 'vol. ' + S.volume : '', S.issue ? 'no. ' + S.issue : '',
+                     S.pages ? pp(S.pages) + ' ' + pagesEn(S.pages) : '', yr,
+                     S.doi ? 'doi: ' + S.doi : S.url].filter(Boolean);
+        return join([A ? A + ',' : '', tt, end(els.join(', '))]);
+    }
+    return join([A ? end(A) : '', '“' + end(S.title) + '”', S.site ? end(S.site) : '', S.url,
+                 S.acc ? '(accessed ' + fmtIEEE(S.acc) + ').' : '']);
+}
+
+function vanNames(as) {
+    const f = a => isOrg(a) ? a.last : a.last + ' ' + initPlain(a.given);
+    return as.length <= 6 ? as.map(f).join(', ') : as.slice(0, 6).map(f).join(', ') + ', et al';
+}
+function vancouver(S) {
+    const A = S.authors.length ? end(vanNames(S.authors)) : '';
+    const yr = S.pub ? S.pub.y : '';
+    if (S.type === 'book') {
+        const pubStr = (S.place ? S.place + ': ' : '') + S.publisher + (yr ? (S.publisher || S.place ? '; ' : '') + yr : '');
+        return join([A, end(S.title), S.edition ? S.edition + ' ed.' : '', pubStr ? end(pubStr) : '']);
+    }
+    if (S.type === 'journal') {
+        const src = S.journal + '. ' + yr + (S.volume ? ';' + S.volume : '') + (S.issue ? '(' + S.issue + ')' : '') +
+                    (S.pages ? ':' + shortRange(S.pages) : '') + '.';
+        const tail = S.doi ? 'doi:' + S.doi : (S.url ? 'Available from: ' + S.url : '');
+        return join([A, end(S.title), src, tail]);
+    }
+    const pubLine = (S.site || '') + (yr ? (S.site ? '; ' : '') + yr : '') + (S.acc ? ' [cited ' + fmtVan(S.acc) + ']' : '');
+    return join([A, S.title.replace(/[.]+$/, '') + ' [Internet].', pubLine ? pubLine + '.' : '',
+                 S.url ? 'Available from: ' + S.url : '']);
+}
+
+function amaNames(as) {
+    const f = a => isOrg(a) ? a.last : a.last + ' ' + initPlain(a.given);
+    return as.length <= 6 ? as.map(f).join(', ') : as.slice(0, 3).map(f).join(', ') + ', et al';
+}
+function ama11(S) {
+    const A = S.authors.length ? end(amaNames(S.authors)) : '';
+    const yr = S.pub ? S.pub.y : '';
+    if (S.type === 'book') {
+        const pubStr = S.publisher + (yr ? (S.publisher ? '; ' : '') + yr : '');
+        return join([A, end(em(S.title)), S.edition ? S.edition + ' ed.' : '', pubStr ? end(pubStr) : '']);
+    }
+    if (S.type === 'journal') {
+        const src = yr + (S.volume ? ';' + S.volume : '') + (S.issue ? '(' + S.issue + ')' : '') +
+                    (S.pages ? ':' + pagesHy(S.pages) : '') + '.';
+        const tail = S.doi ? 'doi:' + S.doi : S.url;
+        return join([A, end(S.title), end(em(S.journal)), src, tail]);
+    }
+    return join([A, end(S.title), S.site ? end(S.site) : '', S.pub ? 'Published ' + fmtUS(S.pub) + '.' : '',
+                 S.acc ? 'Accessed ' + fmtUS(S.acc) + '.' : '', S.url]);
+}
+
+function aacr2(S) {
+    const as = S.authors, n = as.length;
+    const heading = n >= 1 && n <= 3 ? inv(as[0]) : '';
+    let stmt = '';
+    if (n === 1) stmt = nat(as[0]);
+    else if (n === 2) stmt = nat(as[0]) + ' and ' + nat(as[1]);
+    else if (n === 3) stmt = nat(as[0]) + ', ' + nat(as[1]) + ' and ' + nat(as[2]);
+    else if (n > 3) stmt = nat(as[0]) + ' [et al.]';
+    const areas = [
+        S.title + (stmt ? ' / ' + stmt : ''),
+        S.edition ? S.edition + ' ed.' : '',
+        (S.place || '[S.l.]') + ' : ' + (S.publisher || '[s.n.]') + ', ' + (S.pub ? S.pub.y : '[n.d.]'),
+        S.extent ? S.extent + (S.size ? ' ; ' + S.size : '') : '',
+        S.series ? '(' + S.series + ')' : '',
+        S.isbn ? 'ISBN ' + S.isbn : ''
+    ].filter(Boolean);
+    let body = '';
+    areas.forEach((a, i) => {
+        const stops = /[.?!]$/.test(plainText(a));
+        body += a + (i < areas.length - 1 ? (stops ? ' -- ' : '. -- ') : (stops ? '' : '.'));
+    });
+    return '<div class="aacr2">' + (heading ? '<div class="aacr2-heading">' + heading + '</div>' : '') +
+           '<div class="aacr2-body">' + body + '</div></div>';
+}
+
+const STYLES = {
+    'apa-7': { label: 'APA 7th - American Psychological Association, 7th Edition', fn: apa7, notes: [
+        'Titles of books, articles and web pages use sentence case: capital letters only on the first word, the first word after a colon, and proper nouns. Check the title you typed.',
+        'Journal names keep their capital letters. Use a hanging indent and sort your reference list alphabetically.'] },
+    'mla-9': { label: 'MLA 9th Edition', fn: mla9, notes: [
+        'Titles use title case: capitalise all major words. Check the title you typed.',
+        'Use a hanging indent and sort your Works Cited list alphabetically.'] },
+    'chicago-17-notes-bib': { label: 'Chicago 17th Edition (Notes & Bibliography)', fn: S => chicago17(S, false), notes: [
+        'This is a bibliography entry, not a footnote. Titles use headline-style capitalisation (title case).'] },
+    'chicago-17-author-date': { label: 'Chicago 17th Edition (Author-Date System)', fn: S => chicago17(S, true), notes: [
+        'This is a reference-list entry; in the text cite (Author Year). Titles use headline-style capitalisation (title case).'] },
+    'harvard': { label: 'Harvard (Cite Them Right)', fn: harvard, notes: [
+        'Harvard has no single official version. This follows Cite Them Right (sentence-case titles); check whether your school or department requires a different one.'] },
+    'ieee': { label: 'IEEE - Institute of Electrical and Electronics Engineers', fn: ieee, notes: [
+        'Add the reference number in square brackets, [1], [2], in the order sources are cited.',
+        'Use the standard abbreviation for journal names (for example, IEEE Trans. Neural Netw.). Article titles use sentence case.'] },
+    'vancouver': { label: 'Vancouver', fn: vancouver, notes: [
+        'Type the standard abbreviated journal name (for example, N Engl J Med). Titles use sentence case.',
+        'Number references in the order they are cited.'] },
+    'ama-11': { label: 'AMA 11th - American Medical Association, 11th Edition', fn: ama11, notes: [
+        'Type the standard abbreviated journal name (for example, N Engl J Med). Article titles use sentence case; book titles use title case.',
+        'AMA 11 leaves out the place of publication. Number references in the order they are cited.'] },
+    'aacr2': { label: 'AACR2 - Anglo-American Cataloguing Rules, 2nd Edition (books)', fn: aacr2, layout: 'card', notes: [
+        'This is a simplified description of a single-volume book, with areas separated by ". --". Check it against the full rules before using it in a catalogue record.',
+        'Capitalise only the first word of the title and proper nouns. The main entry is under the first author for up to three authors, and under the title for four or more or when there is no author.',
+        '[S.l.], [s.n.] and [n.d.] stand for unknown place, publisher and date.'] }
+};
+
+const $ = id => document.getElementById(id);
+
+function imgFallback(img) {
+    const next = (img.dataset.fallbacks || '').split('|').filter(Boolean);
+    if (!next.length) { img.onerror = null; return; }
+    img.dataset.fallbacks = next.slice(1).join('|');
+    img.src = next[0];
+}
+
+function addAuthorRow() {
+    const row = document.createElement('div');
+    row.className = 'author-row';
+    row.innerHTML =
+        '<input type="text" class="a-last" placeholder="Surname (or organization)" aria-label="Author surname or organization">' +
+        '<input type="text" class="a-given" placeholder="Given names" aria-label="Author given names">' +
+        '<button type="button" class="btn-small btn-remove" aria-label="Remove this author" onclick="removeAuthorRow(this)">&times;</button>';
+    $('author-list').appendChild(row);
+    refreshRemoveButtons();
+}
+function removeAuthorRow(btn) {
+    btn.parentNode.remove();
+    refreshRemoveButtons();
+}
+function refreshRemoveButtons() {
+    const rows = document.querySelectorAll('.author-row');
+    rows.forEach(r => { r.querySelector('.btn-remove').hidden = rows.length === 1; });
+}
+
+function updateForm() {
+    const style = $('style-select').value;
+    const typeSel = $('f-type');
+    if (style === 'aacr2') { typeSel.value = 'book'; typeSel.disabled = true; }
+    else { typeSel.disabled = false; }
+    $('type-hint').hidden = style !== 'aacr2';
+    const type = typeSel.value;
+    document.querySelectorAll('[data-types]').forEach(el => {
+        el.hidden = !el.dataset.types.split(' ').includes(type);
+    });
+    document.querySelectorAll('[data-style]').forEach(el => {
+        el.hidden = el.dataset.style !== style;
+    });
+    $('title-label').textContent = type === 'journal' ? 'Article title' : type === 'website' ? 'Page title' : 'Book title';
+    $('link-label').textContent = type === 'website' ? 'Link to the web page (required)' : 'Link or DOI (optional)';
+    $('f-link').placeholder = type === 'website' ? 'Paste the web address here, e.g., https://www.example.com/page' : 'Paste the web link or DOI here, if there is one';
+}
+
+function readForm() {
+    const g = id => ($(id).value || '').trim().replace(/\s+/g, ' ');
+    const type = g('f-type');
+    const authors = [];
+    let badAuthor = false;
+    document.querySelectorAll('.author-row').forEach(row => {
+        const last = row.querySelector('.a-last').value.trim().replace(/\s+/g, ' ');
+        let given = row.querySelector('.a-given').value.trim().replace(/\s+/g, ' ');
+        if (!last && !given) return;
+        if (!last) { badAuthor = true; return; }
+        let suffix = '';
+        const sm = /[\s,]+(?:(jr|sr)\.?|(ii|iii|iv))$/i.exec(given);
+        if (sm) {
+            suffix = sm[1] ? sm[1].charAt(0).toUpperCase() + sm[1].slice(1).toLowerCase() + '.' : sm[2].toUpperCase();
+            given = given.slice(0, sm.index).trim();
+        }
+        authors.push({ last: esc(last), given: esc(given), suffix: esc(suffix) });
+    });
+
+    const yearRaw = type === 'book' ? g('f-year-b') : type === 'journal' ? g('f-year-j') : '';
+    let pub = null, acc = null;
+    if (type === 'website') { pub = parseDate(g('f-pubdate')); acc = parseDate(g('f-accessed')); }
+    else if (yearRaw) { pub = { y: esc(yearRaw) }; }
+
+    const link = parseLink(g('f-link'));
+    let doi = link.doi, url = link.url;
+    if (type === 'website' && doi) { url = 'https://doi.org/' + doi; doi = ''; }
+
+    const book = type === 'book', aacr = $('style-select').value === 'aacr2';
+    let extent = aacr ? g('f-extent') : '', size = aacr ? g('f-size') : '';
+    extent = extent.replace(/^(\d+)\s*(?:p|pp|pages)?\.?$/i, '$1 p.');
+    size = size.replace(/^(\d+(?:\.\d+)?)\s*(?:cm)?\.?$/i, '$1 cm.');
+
+    return {
+        type, authors, badAuthor, yearRaw,
+        title: esc(g('f-title')),
+        edition: book ? esc(normEdition(g('f-edition'))) : '',
+        place: book ? esc(g('f-place')) : '',
+        publisher: book ? esc(g('f-publisher')) : '',
+        journal: type === 'journal' ? esc(g('f-journal')) : '',
+        volume: type === 'journal' ? esc(g('f-volume')) : '',
+        issue: type === 'journal' ? esc(g('f-issue')) : '',
+        pages: type === 'journal' ? esc(g('f-pages')) : '',
+        site: type === 'website' ? esc(g('f-site')) : '',
+        doi: esc(doi), url: esc(url), pub, acc,
+        extent: esc(extent), size: esc(size),
+        series: aacr ? esc(g('f-series')) : '', isbn: aacr ? esc(g('f-isbn')) : ''
+    };
+}
+
+function validate(S) {
+    const errors = [];
+    if (!S.title) errors.push('enter the title');
+    if (S.type === 'journal' && !S.journal) errors.push('enter the journal name');
+    if (S.type === 'website' && !S.url) errors.push('paste the link (web address) of the page');
+    if (S.badAuthor) errors.push('every author needs a surname (or organization name)');
+    if (S.yearRaw && !/^\d{4}[a-z]?$/i.test(S.yearRaw)) errors.push('write the year with four digits, for example 2024');
+    return errors;
+}
+
+function tipsFor(S) {
+    const t = [];
+    if (S.type === 'book') { if (!S.publisher) t.push('the publisher'); if (!S.pub) t.push('the year'); }
+    if (S.type === 'journal') { if (!S.pub) t.push('the year'); if (!S.volume) t.push('the volume'); if (!S.pages) t.push('the pages'); }
+    if (S.type === 'website' && !S.pub) t.push('the date published');
+    let msg = t.length ? 'For a more complete citation, add ' + t.join(', ') + '.' : '';
+    if (!S.authors.length) msg += (msg ? ' ' : '') + 'No author was entered, so the title is used in the author position where the style allows it.';
+    return msg;
+}
+
+let copyTimer;
+function generateCitation() {
+    const outputBox = $('result-box');
+    outputBox.style.display = 'block';
+    const styleKey = $('style-select').value;
+    const style = STYLES[styleKey];
+    const S = readForm();
+    const errors = validate(S);
+    if (errors.length) {
+        outputBox.innerHTML = "<p style='color:red; font-weight:bold;'>Please " + errors.join('; ') + '.</p>';
+        return;
+    }
+    let html;
+    try {
+        html = style.fn(S);
+    } catch (err) {
+        console.error('Citation error:', err);
+        outputBox.innerHTML = '<h4 style="color: #FF0000; margin-top: 0;">Error</h4><p style="font-size: 14px;">Something went wrong while formatting. Please check your entries and try again.</p>';
+        return;
+    }
+    const tips = tipsFor(S);
+    const label = style.label.replace(/&/g, '&amp;');
+    outputBox.innerHTML =
+        '<h4 style="color: #28a745; margin-top: 0;">Complete!</h4>' +
+        '<p style="font-size: 13px; color: #666; margin-bottom: 10px;"><strong>Format:</strong> ' + label + '</p>' +
+        '<p><strong>Generated Reference:</strong></p>' +
+        '<div id="citation-output" class="citation' + (style.layout === 'card' ? ' citation-card' : '') + '">' + html + '</div>' +
+        '<button type="button" class="btn-small" id="copy-btn" onclick="copyCitation()">Copy citation</button>' +
+        (tips ? '<div class="tips">' + tips + '</div>' : '') +
+        '<p style="font-size: 13px; color: #475569; margin: 14px 0 4px 0;"><strong>Check before you submit:</strong></p>' +
+        '<ul class="notes">' + style.notes.map(n => '<li>' + n.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</li>').join('') + '</ul>';
+}
+
+async function copyCitation() {
+    const el = $('citation-output'), btn = $('copy-btn');
+    const flash = msg => {
+        btn.textContent = msg;
+        clearTimeout(copyTimer);
+        copyTimer = setTimeout(() => { btn.textContent = 'Copy citation'; }, 2000);
+    };
+    try {
+        if (!(window.ClipboardItem && navigator.clipboard && navigator.clipboard.write)) throw new Error('rich copy unavailable');
+        await navigator.clipboard.write([new ClipboardItem({
+            'text/html': new Blob([el.innerHTML], { type: 'text/html' }),
+            'text/plain': new Blob([el.innerText], { type: 'text/plain' })
+        })]);
+        flash('Copied!');
+    } catch (e) {
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+        let ok = false;
+        try { ok = document.execCommand('copy'); } catch (e2) { ok = false; }
+        flash(ok ? 'Copied!' : 'Press Ctrl+C to copy');
+    }
+}
+
+(function init() {
+    const sel = $('style-select');
+    Object.keys(STYLES).forEach(key => {
+        const opt = document.createElement('option');
+        opt.value = key;
+        opt.textContent = STYLES[key].label;
+        if (key === 'apa-7') opt.selected = true;
+        sel.appendChild(opt);
+    });
+    addAuthorRow();
+    updateForm();
+})();
+</script>
+
+</body>
+</html>
