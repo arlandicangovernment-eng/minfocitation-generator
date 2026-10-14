@@ -200,6 +200,8 @@
         <div class="section">
             <label for="f-title" id="title-label">Book title</label>
             <input type="text" id="f-title" placeholder="Type the title as it appears on the source">
+            <label for="f-subtitle" id="subtitle-label">Subtitle (optional)</label>
+            <input type="text" id="f-subtitle" placeholder="Type the subtitle, if the source has one">
         </div>
 
         <div data-types="journal">
@@ -337,7 +339,7 @@
             <p style="margin-left: 15px;"><strong>Authors</strong><br>
             Type the surname in the first box and the given names in the second. Click "+ Add author" for more authors. For an organization, type its name in the first box and leave the second empty.</p>
             <p style="margin-left: 15px;"><strong>Titles</strong><br>
-            Type the title as it appears on the source. The tool does not change capital letters, so follow the style's rule (for example, APA uses sentence case).</p>
+            Type the title as it appears on the source. If it has a subtitle, type that in the Subtitle box; the tool joins the two with a colon. The tool then applies the capital-letter rule of the style you chose (sentence case for APA, Harvard, IEEE and Vancouver; title case for MLA and Chicago). It cannot recognise every name or place, so check those.</p>
         </div>
 
         <div class="step-block">
@@ -657,17 +659,17 @@ function aacr2(S) {
 
 const STYLES = {
     'apa-7': { label: 'APA 7th - American Psychological Association, 7th Edition', fn: apa7, notes: [
-        'Titles of books, articles and web pages use sentence case: capital letters only on the first word, the first word after a colon, and proper nouns. Check the title you typed.',
+        'Titles of books, articles and web pages use sentence case: capital letters only on the first word, the first word after a colon, and proper nouns. The tool applies this for you, but it cannot recognise every name or place, so check them.',
         'Journal names keep their capital letters. Use a hanging indent and sort your reference list alphabetically.'] },
     'mla-9': { label: 'MLA 9th Edition', fn: mla9, notes: [
-        'Titles use title case: capitalise all major words. Check the title you typed.',
+        'Titles use title case: capitalise all major words. The tool applies this for you; check names and unusual words.',
         'Use a hanging indent and sort your Works Cited list alphabetically.'] },
     'chicago-17-notes-bib': { label: 'Chicago 17th Edition (Notes & Bibliography)', fn: S => chicago17(S, false), notes: [
-        'This is a bibliography entry, not a footnote. Titles use headline-style capitalisation (title case).'] },
+        'This is a bibliography entry, not a footnote. Titles use headline-style capitalisation (title case), which the tool applies for you.'] },
     'chicago-17-author-date': { label: 'Chicago 17th Edition (Author-Date System)', fn: S => chicago17(S, true), notes: [
-        'This is a reference-list entry; in the text cite (Author Year). Titles use headline-style capitalisation (title case).'] },
+        'This is a reference-list entry; in the text cite (Author Year). Titles use headline-style capitalisation (title case), which the tool applies for you.'] },
     'harvard': { label: 'Harvard (Cite Them Right)', fn: harvard, notes: [
-        'Harvard has no single official version. This follows Cite Them Right (sentence-case titles); check whether your school or department requires a different one.'] },
+        'Harvard has no single official version. This follows Cite Them Right (sentence-case titles, applied for you; the subtitle after a colon starts in lowercase); check whether your school or department requires a different one.'] },
     'ieee': { label: 'IEEE - Institute of Electrical and Electronics Engineers', fn: ieee, notes: [
         'Add the reference number in square brackets, [1], [2], in the order sources are cited.',
         'Use the standard abbreviation for journal names (for example, IEEE Trans. Neural Netw.). Article titles use sentence case.'] },
@@ -729,6 +731,131 @@ function updateForm() {
     $('f-link').placeholder = type === 'website' ? 'Paste the web address here, e.g., https://www.example.com/page' : 'Paste the web link or DOI here, if there is one';
 }
 
+/* ---------- Title capitalization ----------
+   Runs on the plain text typed by the user, BEFORE esc() and em() add entities or <em> tags,
+   so italics and HTML are never touched. Tags and entities are also skipped defensively. */
+const TITLE_MINOR = new Set(('a an and as at but by for from in nor of on or per so the to via with yet ' +
+    'about above across after against along amid among around before behind below beneath beside besides ' +
+    'between beyond despite during except inside into like onto outside since through throughout toward towards ' +
+    'under underneath until upon within without').split(' '));
+const PROPER = new Map(('January February April June July September October November December ' +
+    'Monday Tuesday Wednesday Thursday Friday Saturday Sunday ' +
+    'English French German Spanish Italian Portuguese Russian Chinese Japanese Korean Arabic Hindi Latin Greek ' +
+    'Filipino Tagalog Cebuano Ilocano Hebrew Dutch Swedish Turkish Vietnamese Thai Indonesian Malay ' +
+    'American British European Asian African Australian Canadian Indian Mexican Christian Muslim Catholic Jewish Hindu Buddhist ' +
+    'America Africa Asia Europe Australia Canada India China Japan Korea Mexico Russia Germany France Spain Italy Brazil ' +
+    'Egypt Israel Philippines Philippine Manila Mindanao Luzon Visayas Pacific Atlantic Bible Quran').split(' ')
+    .map(w => [w.toLowerCase(), w]));
+
+function titleRule(styleKey, type) {
+    const book = type === 'book';
+    switch (styleKey) {
+        case 'apa-7':    return { mode: 'sentence', capSub: true };
+        case 'harvard':  return { mode: 'sentence', capSub: false };
+        case 'vancouver':
+        case 'aacr2':    return { mode: 'sentence', capSub: false };
+        case 'ieee':     return book ? { mode: 'title' } : { mode: 'sentence', capSub: false };
+        case 'ama-11':   return book ? { mode: 'title' } : { mode: 'sentence', capSub: true };
+        case 'mla-9':
+        case 'chicago-17-notes-bib':
+        case 'chicago-17-author-date': return { mode: 'title' };
+        default:         return { mode: 'none' };
+    }
+}
+
+function joinTitle(main, sub) {
+    if (!main) return '';
+    if (!sub) return main;
+    return main + (/[?!:]$/.test(main) ? ' ' : ': ') + sub;
+}
+
+function formatTitle(raw, rule) {
+    if (!raw || !rule || rule.mode === 'none') return raw;
+    const re = /<[^>]*>|&#?\w+;|[:?!]|(?:\p{L}\.){2,}|[\p{L}\p{N}][\p{L}\p{N}'’]*(?:-[\p{L}\p{N}][\p{L}\p{N}'’]*)*/gu;
+    const toks = [];
+    let last = 0, m;
+    while ((m = re.exec(raw))) {
+        if (m.index > last) toks.push({ k: 'o', t: raw.slice(last, m.index) });
+        const t = m[0];
+        const k = t[0] === '<' || (t[0] === '&' && t.length > 1) ? 'x'
+                : /^[:?!]$/.test(t) ? 'b'
+                : /^(?:\p{L}\.){2,}$/u.test(t) ? 'a' : 'w';
+        toks.push({ k, t, i: m.index });
+        last = re.lastIndex;
+    }
+    if (last < raw.length) toks.push({ k: 'o', t: raw.slice(last) });
+
+    // position of each word: start of title, after a colon, after ? or !, or ordinary; plus "last word of a segment"
+    let mark = 'start';
+    toks.forEach(tk => {
+        if (tk.k === 'b') mark = tk.t === ':' ? 'colon' : 'sent';
+        else if (tk.k === 'w' || tk.k === 'a') { tk.pos = mark; mark = null; }
+    });
+    let brk = true;
+    for (let j = toks.length - 1; j >= 0; j--) {
+        const tk = toks[j];
+        if (tk.k === 'b') brk = true;
+        else if (tk.k === 'w' || tk.k === 'a') { tk.end = brk; brk = false; }
+    }
+
+    const isMixed = p => /\p{Lu}/u.test(p.slice(1));
+    const cap = x => x.charAt(0).toUpperCase() + x.slice(1);
+    const properOf = p => {
+        const base = p.replace(/['’]s$/i, '');
+        const hit = PROPER.get(base.toLowerCase());
+        return hit ? hit + p.slice(base.length) : null;
+    };
+    const words = toks.filter(tk => tk.k === 'w');
+    const letters = raw.replace(/[^\p{L}]/gu, '');
+    const shout = words.length > 1 && letters.length > 1 && letters === letters.toUpperCase();
+
+    // Sentence case: only lower words when the input looks like Title Case (every major word capitalised)
+    // or ALL CAPS. If the user already typed sentence case, their capitals (proper nouns) are kept.
+    let lowerAll = shout;
+    if (rule.mode === 'sentence' && !shout) {
+        const majors = words.filter(tk => {
+            if (tk.pos) return false;
+            const first = tk.t.split('-')[0].replace(/['’]+$/, '');
+            return first.length >= 3 && /^\p{L}/u.test(first) && !isMixed(first) &&
+                   !TITLE_MINOR.has(first.toLowerCase()) && !properOf(first);
+        });
+        lowerAll = majors.length > 0 && majors.every(tk => /^\p{Lu}/u.test(tk.t));
+    }
+
+    const fix = tk => {
+        const sm = /^(.*?)(['’]*)$/.exec(tk.t);
+        const core = sm[1], trail = sm[2];
+        if (tk.k === 'a') return tk.t;
+        const nextCh = raw.charAt(tk.i + tk.t.length);
+        if (core.length === 1 && /\p{Lu}/u.test(core)) {
+            if (nextCh === '.') return tk.t;                         // initials: J. R. R.
+            if (core === 'I' || (core !== 'A' && !shout)) return tk.t; // I, Vitamin B, Plan C
+        }
+        const parts = core.split('-');
+        let out;
+        if (rule.mode === 'sentence') {
+            out = parts.map(p => {
+                if (!shout && isMixed(p)) return p;                  // NASA, iPhone, COVID-19
+                const pr = properOf(p);
+                if (pr) return pr;
+                return lowerAll ? p.toLowerCase() : p;
+            });
+            const needCap = tk.pos === 'start' || tk.pos === 'sent' || (tk.pos === 'colon' && rule.capSub);
+            if (needCap) out[0] = cap(out[0]);
+        } else {
+            out = parts.map((p, i) => {
+                if (!shout && isMixed(p)) return p;
+                const key = p.toLowerCase();
+                const keepLower = TITLE_MINOR.has(key) && !(i === 0 && (tk.pos || tk.end));
+                return keepLower ? key : cap(key);
+            });
+            if (tk.pos || tk.end) out[0] = cap(out[0]);
+        }
+        return out.join('-') + trail;
+    };
+    return toks.map(tk => tk.k === 'w' ? fix(tk) : tk.t).join('');
+}
+
 function readForm() {
     const g = id => ($(id).value || '').trim().replace(/\s+/g, ' ');
     const type = g('f-type');
@@ -762,9 +889,12 @@ function readForm() {
     extent = extent.replace(/^(\d+)\s*(?:p|pp|pages)?\.?$/i, '$1 p.');
     size = size.replace(/^(\d+(?:\.\d+)?)\s*(?:cm)?\.?$/i, '$1 cm.');
 
+    const mainTitle = g('f-title'), subTitle = g('f-subtitle');
+    const titleText = formatTitle(joinTitle(mainTitle, subTitle), titleRule($('style-select').value, type));
+
     return {
         type, authors, badAuthor, yearRaw,
-        title: esc(g('f-title')),
+        title: esc(titleText),
         edition: book ? esc(normEdition(g('f-edition'))) : '',
         place: book ? esc(g('f-place')) : '',
         publisher: book ? esc(g('f-publisher')) : '',
