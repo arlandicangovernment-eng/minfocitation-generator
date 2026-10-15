@@ -801,9 +801,6 @@ function updateForm() {
     $('f-link').placeholder = type === 'website' ? 'Paste the web address of the page here' : 'Paste the web link or DOI here, if there is one';
 }
 
-/* ---------- Title capitalization ----------
-   Runs on the plain text typed by the user, BEFORE esc() and em() add entities or <em> tags,
-   so italics and HTML are never touched. Tags and entities are also skipped defensively. */
 const TITLE_MINOR = new Set(('a an and as at but by for from in nor of on or per so the to via with yet ' +
     'about above across after against along amid among around before behind below beneath beside besides ' +
     'between beyond despite during except inside into like onto outside since through throughout toward towards ' +
@@ -854,7 +851,6 @@ function formatTitle(raw, rule) {
     }
     if (last < raw.length) toks.push({ k: 'o', t: raw.slice(last) });
 
-    // position of each word: start of title, after a colon, after ? or !, or ordinary; plus "last word of a segment"
     let mark = 'start';
     toks.forEach(tk => {
         if (tk.k === 'b') mark = tk.t === ':' ? 'colon' : 'sent';
@@ -878,8 +874,6 @@ function formatTitle(raw, rule) {
     const letters = raw.replace(/[^\p{L}]/gu, '');
     const shout = words.length > 1 && letters.length > 1 && letters === letters.toUpperCase();
 
-    // Sentence case: only lower words when the input looks like Title Case (every major word capitalised)
-    // or ALL CAPS. If the user already typed sentence case, their capitals (proper nouns) are kept.
     let lowerAll = shout;
     if (rule.mode === 'sentence' && !shout) {
         const majors = words.filter(tk => {
@@ -897,14 +891,14 @@ function formatTitle(raw, rule) {
         if (tk.k === 'a') return tk.t;
         const nextCh = raw.charAt(tk.i + tk.t.length);
         if (core.length === 1 && /\p{Lu}/u.test(core)) {
-            if (nextCh === '.') return tk.t;                         // initials: J. R. R.
-            if (core === 'I' || (core !== 'A' && !shout)) return tk.t; // I, Vitamin B, Plan C
+            if (nextCh === '.') return tk.t;
+            if (core === 'I' || (core !== 'A' && !shout)) return tk.t;
         }
         const parts = core.split('-');
         let out;
         if (rule.mode === 'sentence') {
             out = parts.map(p => {
-                if (!shout && isMixed(p)) return p;                  // NASA, iPhone, COVID-19
+                if (!shout && isMixed(p)) return p;
                 const pr = properOf(p);
                 if (pr) return pr;
                 return lowerAll ? p.toLowerCase() : p;
@@ -1053,7 +1047,6 @@ async function copyCitation(outId, btnId) {
     }
 }
 
-/* ================= Cataloging Mode (AACR2 / RDA) ================= */
 function setMode(mode) {
     const cat = mode === 'catalog';
     $('mode-standard').hidden = cat;
@@ -1216,7 +1209,6 @@ function buildCatalogRecord(C) {
     const rule = { mode: 'sentence', capSub: false };
     const assumed = [];
 
-    // Title proper and other title information (capitalised as one title, then split again)
     let tp = C.title, oti = '';
     if (C.other) {
         const combo = tp + ': ' + C.other;
@@ -1229,7 +1221,6 @@ function buildCatalogRecord(C) {
     const series = C.series ? formatTitle(C.series, rule) : '';
     const seriesNo = series ? C.seriesNo : '';
 
-    // Access points: AACR2 applies the rule of three; RDA uses the first-named creator
     const A = C.authors, n = A.length;
     const main = rda ? (n ? A[0] : null) : (n >= 1 && n <= 3 ? A[0] : null);
     const added = rda ? A.slice(1) : (n >= 2 && n <= 3 ? A.slice(1) : (n > 3 ? [A[0]] : []));
@@ -1268,7 +1259,6 @@ function buildCatalogRecord(C) {
     const pubEnd = d => /[\]\-]$/.test(d) ? d : catEnd(d);
     let display = '';
 
-    // ----- MARC 21 (shared parts) -----
     if (main) {
         const heading = rda ? nm(main) + ', $e author.' : catEnd(nm(main));
         tag(isOrg(main) ? '110' : '100', isOrg(main) ? '2#' : '1#', '$a ' + heading);
@@ -1312,7 +1302,6 @@ function buildCatalogRecord(C) {
     marc.sort((a, b) => a.t < b.t ? -1 : a.t > b.t ? 1 : 0);
     const marcText = marc.map(m => m.line).join('\n');
 
-    // ----- Display -----
     if (!rda) {
         const titleArea = tp + (gmd ? ' ' + gmd : '') + (oti ? ' : ' + oti : '') + (sor ? ' / ' + sor : '');
         const pubArea = bothMissing ? '[S.l. : s.n.], ' + D.pub : place + ' : ' + pub + ', ' + D.pub;
