@@ -149,6 +149,7 @@
     .cat-card .cat-heading { margin-bottom: 4px; }
     .cat-card .cat-body { margin-left: 1.5em; }
     .cat-card .cat-tracing { margin: 8px 0 0 1.5em; }
+    .cat-card .cat-isbn { margin: 8px 0 0 1.5em; }
     .cat-table { border-collapse: collapse; width: 100%; font-size: 14px; }
     .cat-table th, .cat-table td { text-align: left; vertical-align: top; padding: 5px 8px; border-bottom: 1px solid #e5e7eb; }
     .cat-table th { width: 42%; font-weight: bold; color: #334155; }
@@ -956,8 +957,8 @@ function readForm() {
         type, authors, badAuthor, yearRaw,
         title: esc(titleText),
         edition: book ? esc(normEdition(g('f-edition'))) : '',
-        place: book ? esc(g('f-place')) : '',
-        publisher: book ? esc(g('f-publisher')) : '',
+        place: book ? esc(catPlace(g('f-place'))) : '',
+        publisher: book ? esc(catPublisher(g('f-publisher'))) : '',
         journal: type === 'journal' ? esc(g('f-journal')) : '',
         volume: type === 'journal' ? esc(g('f-volume')) : '',
         issue: type === 'journal' ? esc(g('f-issue')) : '',
@@ -1104,7 +1105,7 @@ function readCatalogForm() {
     };
 }
 
-const cleanId = s => String(s || '').replace(/[\s\u2010-\u2015-]/g, '').toUpperCase();
+const cleanId = s => String(s || '').toUpperCase().replace(/^\s*(?:ISBN|ISSN)(?:-?1[03])?\s*:?/, '').replace(/[\s\u2010-\u2015-]/g, '');
 function isbn10ok(d) {
     if (!/^\d{9}[\dX]$/.test(d)) return false;
     let sum = 0;
@@ -1202,7 +1203,17 @@ function catDate(raw, rda, serial) {
     return { pub: d, copy: '' };
 }
 const catEnd = s => /[.?!]$/.test(s) ? s : s + '.';
-const catNonfiling = t => { const m = /^(the|a|an)\s+/i.exec(t); return m && m[0].length < 10 ? m[0].length : 0; };
+const catNonfiling = t => { const m = /^[“"'‘(\[]*(?:the|a|an)\s+/i.exec(t); return m && m[0].length < 10 ? m[0].length : 0; };
+const US_STATES = new Set('AL AK AZ AR CA CO CT DE DC FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY'.split(' '));
+const TITLE_RULE = { mode: 'title' };
+const catTrim = s => String(s || '').replace(/^[\s,;:]+|[\s,;:]+$/g, '');
+function catPlace(raw) {
+    const t = catTrim(raw);
+    const m = /^(.*?)[\s,]+([A-Za-z]{2})\.?$/.exec(t);
+    const base = m && catTrim(m[1]) && US_STATES.has(m[2].toUpperCase()) ? catTrim(m[1]) + ', ' + m[2] : t;
+    return formatTitle(base, TITLE_RULE).replace(/,\s*([A-Za-z]{2,3})(?=\s|,|$)/g, (x, a) => ', ' + a.toUpperCase());
+}
+const catPublisher = raw => formatTitle(catTrim(raw), TITLE_RULE);
 
 function buildCatalogRecord(C) {
     const rda = C.std === 'rda', online = C.medium === 'online', serial = C.type === 'serial';
@@ -1218,7 +1229,7 @@ function buildCatalogRecord(C) {
     } else {
         tp = formatTitle(tp, rule);
     }
-    const series = C.series ? formatTitle(C.series, rule) : '';
+    const series = C.series ? formatTitle(C.series, TITLE_RULE) : '';
     const seriesNo = series ? C.seriesNo : '';
 
     const A = C.authors, n = A.length;
@@ -1239,10 +1250,17 @@ function buildCatalogRecord(C) {
 
     const D = catDate(C.date, rda, serial);
     if (!C.date) assumed.push('No year was given, so the date is shown as ' + D.pub + '.');
-    const noPlace = !C.place, noPub = !C.publisher;
+    let rawPlace = C.place, rawPub = C.publisher;
+    if (!rawPub && rawPlace.includes(':')) {
+        const i = rawPlace.indexOf(':');
+        rawPub = rawPlace.slice(i + 1);
+        rawPlace = rawPlace.slice(0, i);
+    }
+    const placeIn = catPlace(rawPlace), pubIn = catPublisher(rawPub);
+    const noPlace = !placeIn, noPub = !pubIn;
     if (noPlace || noPub) assumed.push('Missing publication details were filled with ' + (rda ? '[Place of publication not identified] and [publisher not identified]' : '[S.l.] and [s.n.]') + '.');
-    const place = C.place || (rda ? '[Place of publication not identified]' : '[S.l.]');
-    const pub = C.publisher || (rda ? '[publisher not identified]' : '[s.n.]');
+    const place = placeIn || (rda ? '[Place of publication not identified]' : '[S.l.]');
+    const pub = pubIn || (rda ? '[publisher not identified]' : '[s.n.]');
 
     const extent = catExtent(C.extent, rda, online, serial);
     if (!C.extent && extent) assumed.push('No extent was given, so "' + extent + '" was used.');
@@ -1250,8 +1268,7 @@ function buildCatalogRecord(C) {
     const dims = !online && extent ? catDims(C.dims) : '';
 
     const idc = cleanId(C.id);
-    const idShown = !C.id ? '' : (serial && idc.length === 8 ? idc.slice(0, 4) + '-' + idc.slice(4) : C.id);
-    const idMarc = !C.id ? '' : (serial ? idShown : idc);
+    const idClean = !idc ? '' : (serial && idc.length === 8 ? idc.slice(0, 4) + '-' + idc.slice(4) : idc);
 
     const nm = a => isOrg(a) ? a.last : inv(a);
     const marc = [];
@@ -1296,7 +1313,7 @@ function buildCatalogRecord(C) {
         tag('490', '1#', '$a ' + s);
         tag('830', '#0', '$a ' + (rda ? s : catEnd(s)));
     }
-    if (idMarc) tag(serial ? '022' : '020', '##', '$a ' + idMarc);
+    if (idClean) tag(serial ? '022' : '020', '##', '$a ' + idClean);
     if (!rda && online) tag('538', '##', '$a Mode of access: World Wide Web.');
     if (C.url) tag('856', '40', '$u ' + C.url);
     marc.sort((a, b) => a.t < b.t ? -1 : a.t > b.t ? 1 : 0);
@@ -1307,8 +1324,7 @@ function buildCatalogRecord(C) {
         const pubArea = bothMissing ? '[S.l. : s.n.], ' + D.pub : place + ' : ' + pub + ', ' + D.pub;
         const physArea = extent ? extent + (details ? ' : ' + details : '') + (dims ? ' ; ' + dims : '') : '';
         const seriesArea = series ? '(' + series + (seriesNo ? ' ; ' + seriesNo : '') + ')' : '';
-        const idArea = idShown ? (serial ? 'ISSN ' : 'ISBN ') + idShown : '';
-        const areas = [titleArea, edition, numbering, pubArea, physArea, seriesArea, idArea].filter(Boolean);
+        const areas = [titleArea, edition, numbering, pubArea, physArea, seriesArea].filter(Boolean);
         let body = '';
         areas.forEach((a, i) => {
             const last = i === areas.length - 1;
@@ -1321,12 +1337,14 @@ function buildCatalogRecord(C) {
         if (series) tr.push(catEnd(series));
         const roman = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
         const tracing = tr.map((t, i) => (roman[i] || String(i + 1)) + '. ' + t).join(' ');
+        const idLine = idClean ? (serial ? 'ISSN ' : 'ISBN ') + idClean : '';
         const notes = online ? ['Mode of access: World Wide Web.'].concat(C.url ? ['URL: ' + C.url] : []) : [];
         display = '<div class="cat-card">' +
             (main ? '<div class="cat-heading">' + esc(catEnd(nm(main))) + '</div>' : '') +
             '<div class="cat-body">' + body + '</div>' +
             notes.map(x => '<div class="cat-body">' + esc(x) + '</div>').join('') +
             (tracing ? '<div class="cat-tracing">' + esc(tracing) + '</div>' : '') +
+            (idLine ? '<div class="cat-isbn">' + esc(idLine) + '</div>' : '') +
             '</div>';
     } else {
         const rows = [];
@@ -1350,7 +1368,7 @@ function buildCatalogRecord(C) {
         row('Dimensions', dims);
         row('Title proper of series', series);
         row('Numbering within series', seriesNo);
-        row('Identifier for the manifestation', idShown ? (serial ? 'ISSN ' : 'ISBN ') + idShown : '');
+        row('Identifier for the manifestation', idClean ? (serial ? 'ISSN ' : 'ISBN ') + idClean : '');
         row('Uniform Resource Identifier', C.url);
         display = '<table class="cat-table"><tbody>' +
             rows.map(r => '<tr><th scope="row">' + esc(r[0]) + '</th><td>' + esc(r[1]) + '</td></tr>').join('') +
