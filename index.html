@@ -141,9 +141,6 @@
     .btn-small:hover { background-color: #cbd5e1; }
     .hint { display: block; font-size: 12px; color: #64748b; margin: 6px 0 15px 0; line-height: 1.4; }
     .citation { background: white; padding: 10px 10px 10px 2.5em; text-indent: -1.5em; border: 1px dashed #bbb; line-height: 1.6; margin-bottom: 10px; }
-    .citation.citation-card { padding-left: 10px; text-indent: 0; }
-    .aacr2-heading { margin-bottom: 4px; }
-    .aacr2-body { margin-left: 1.5em; }
     .tips { background: #fff8e1; border-left: 4px solid #f59e0b; padding: 8px 12px; font-size: 13px; color: #78350f; margin-top: 12px; border-radius: 4px; }
     .notes { font-size: 13px; color: #475569; margin: 0; padding-left: 18px; line-height: 1.5; }
     @media (max-width: 480px) {
@@ -187,7 +184,6 @@
                 <option value="journal">Journal article</option>
                 <option value="website">Website / web page</option>
             </select>
-            <span class="hint" id="type-hint" hidden>AACR2 describes books only, so the source type is set to Book.</span>
         </div>
 
         <div class="section">
@@ -199,62 +195,62 @@
 
         <div class="section">
             <label for="f-title" id="title-label">Book title</label>
-            <input type="text" id="f-title" placeholder="Type the title as it appears on the source">
+            <input type="text" id="f-title" placeholder="Type the book title">
             <label for="f-subtitle" id="subtitle-label">Subtitle (optional)</label>
-            <input type="text" id="f-subtitle" placeholder="Type the subtitle, if the source has one">
+            <input type="text" id="f-subtitle" placeholder="Type the subtitle, if there is one">
         </div>
 
         <div data-types="journal">
             <label for="f-journal">Journal name</label>
-            <input type="text" id="f-journal" placeholder="e.g., Journal of Library Science">
+            <input type="text" id="f-journal" placeholder="Type the journal name">
         </div>
 
         <div data-types="website">
             <label for="f-site">Website name (optional)</label>
-            <input type="text" id="f-site" placeholder="e.g., World Health Organization">
+            <input type="text" id="f-site" placeholder="Type the website name">
         </div>
 
         <div data-types="book">
             <div class="row">
                 <div>
                     <label for="f-edition">Edition (optional)</label>
-                    <input type="text" id="f-edition" placeholder="e.g., 2">
+                    <input type="text" id="f-edition" placeholder="Type the edition number">
                 </div>
                 <div>
                     <label for="f-year-b">Year</label>
-                    <input type="text" id="f-year-b" placeholder="e.g., 2024" inputmode="numeric">
+                    <input type="text" id="f-year-b" placeholder="Type the year" inputmode="numeric">
                 </div>
             </div>
             <div class="row">
                 <div>
                     <label for="f-place">Place of publication</label>
-                    <input type="text" id="f-place" placeholder="e.g., Sample City">
+                    <input type="text" id="f-place" placeholder="Type the place of publication">
                 </div>
                 <div>
                     <label for="f-publisher">Publisher</label>
-                    <input type="text" id="f-publisher" placeholder="e.g., Sample Publisher">
+                    <input type="text" id="f-publisher" placeholder="Type the publisher name">
                 </div>
             </div>
-            <span class="hint">The place is used by Chicago, Harvard, IEEE, Vancouver and AACR2. APA, MLA and AMA leave it out.</span>
+            <span class="hint">The place is used by Chicago, Harvard, IEEE and Vancouver. APA, MLA and AMA leave it out.</span>
         </div>
 
         <div data-types="journal">
             <div class="row">
                 <div>
                     <label for="f-year-j">Year</label>
-                    <input type="text" id="f-year-j" placeholder="e.g., 2023" inputmode="numeric">
+                    <input type="text" id="f-year-j" placeholder="Type the year" inputmode="numeric">
                 </div>
                 <div>
                     <label for="f-volume">Volume</label>
-                    <input type="text" id="f-volume" placeholder="e.g., 12">
+                    <input type="text" id="f-volume" placeholder="Type the volume number">
                 </div>
                 <div>
                     <label for="f-issue">Issue</label>
-                    <input type="text" id="f-issue" placeholder="e.g., 3">
+                    <input type="text" id="f-issue" placeholder="Type the issue number">
                 </div>
             </div>
             <label for="f-pages">Pages</label>
-            <input type="text" id="f-pages" placeholder="e.g., 123-129">
+            <input type="text" id="f-pages" placeholder="Type the page range">
         </div>
 
         <div data-types="website">
@@ -274,29 +270,6 @@
             <label for="f-link" id="link-label">Link or DOI (optional)</label>
             <input type="text" id="f-link" placeholder="Paste the web link or DOI here, if there is one">
             <span class="hint" style="margin-top: -8px;">A link is the web address of the source (it starts with https://). A DOI is a code like 10.1000/xyz123, usually printed on journal articles.</span>
-        </div>
-
-        <div data-style="aacr2">
-            <div class="row">
-                <div>
-                    <label for="f-extent">Extent (optional)</label>
-                    <input type="text" id="f-extent" placeholder="e.g., 250 p.">
-                </div>
-                <div>
-                    <label for="f-size">Size (optional)</label>
-                    <input type="text" id="f-size" placeholder="e.g., 24 cm">
-                </div>
-            </div>
-            <div class="row">
-                <div>
-                    <label for="f-series">Series (optional)</label>
-                    <input type="text" id="f-series" placeholder="e.g., Library science series ; 5">
-                </div>
-                <div>
-                    <label for="f-isbn">ISBN (optional)</label>
-                    <input type="text" id="f-isbn" placeholder="e.g., 9781234567890">
-                </div>
-            </div>
         </div>
 
         <button type="button" onclick="generateCitation()">Process Now</button>
@@ -632,31 +605,6 @@ function ama11(S) {
                  S.acc ? 'Accessed ' + fmtUS(S.acc) + '.' : '', S.url]);
 }
 
-function aacr2(S) {
-    const as = S.authors, n = as.length;
-    const heading = n >= 1 && n <= 3 ? inv(as[0]) : '';
-    let stmt = '';
-    if (n === 1) stmt = nat(as[0]);
-    else if (n === 2) stmt = nat(as[0]) + ' and ' + nat(as[1]);
-    else if (n === 3) stmt = nat(as[0]) + ', ' + nat(as[1]) + ' and ' + nat(as[2]);
-    else if (n > 3) stmt = nat(as[0]) + ' [et al.]';
-    const areas = [
-        S.title + (stmt ? ' / ' + stmt : ''),
-        S.edition ? S.edition + ' ed.' : '',
-        (S.place || '[S.l.]') + ' : ' + (S.publisher || '[s.n.]') + ', ' + (S.pub ? S.pub.y : '[n.d.]'),
-        S.extent ? S.extent + (S.size ? ' ; ' + S.size : '') : '',
-        S.series ? '(' + S.series + ')' : '',
-        S.isbn ? 'ISBN ' + S.isbn : ''
-    ].filter(Boolean);
-    let body = '';
-    areas.forEach((a, i) => {
-        const stops = /[.?!]$/.test(plainText(a));
-        body += a + (i < areas.length - 1 ? (stops ? ' -- ' : '. -- ') : (stops ? '' : '.'));
-    });
-    return '<div class="aacr2">' + (heading ? '<div class="aacr2-heading">' + heading + '</div>' : '') +
-           '<div class="aacr2-body">' + body + '</div></div>';
-}
-
 const STYLES = {
     'apa-7': { label: 'APA 7th - American Psychological Association, 7th Edition', fn: apa7, notes: [
         'Titles of books, articles and web pages use sentence case: capital letters only on the first word, the first word after a colon, and proper nouns. The tool applies this for you, but it cannot recognise every name or place, so check them.',
@@ -678,11 +626,7 @@ const STYLES = {
         'Number references in the order they are cited.'] },
     'ama-11': { label: 'AMA 11th - American Medical Association, 11th Edition', fn: ama11, notes: [
         'Type the standard abbreviated journal name (for example, N Engl J Med). Article titles use sentence case; book titles use title case.',
-        'AMA 11 leaves out the place of publication. Number references in the order they are cited.'] },
-    'aacr2': { label: 'AACR2 - Anglo-American Cataloguing Rules, 2nd Edition (books)', fn: aacr2, layout: 'card', notes: [
-        'This is a simplified description of a single-volume book, with areas separated by ". --". Check it against the full rules before using it in a catalogue record.',
-        'Capitalise only the first word of the title and proper nouns. The main entry is under the first author for up to three authors, and under the title for four or more or when there is no author.',
-        '[S.l.], [s.n.] and [n.d.] stand for unknown place, publisher and date.'] }
+        'AMA 11 leaves out the place of publication. Number references in the order they are cited.'] }
 };
 
 const $ = id => document.getElementById(id);
@@ -698,8 +642,8 @@ function addAuthorRow() {
     const row = document.createElement('div');
     row.className = 'author-row';
     row.innerHTML =
-        '<input type="text" class="a-last" placeholder="Surname (or organization)" aria-label="Author surname or organization">' +
-        '<input type="text" class="a-given" placeholder="Given names" aria-label="Author given names">' +
+        '<input type="text" class="a-last" placeholder="Author surname (or organization)" aria-label="Author surname or organization">' +
+        '<input type="text" class="a-given" placeholder="Author given names" aria-label="Author given names">' +
         '<button type="button" class="btn-small btn-remove" aria-label="Remove this author" onclick="removeAuthorRow(this)">&times;</button>';
     $('author-list').appendChild(row);
     refreshRemoveButtons();
@@ -714,21 +658,14 @@ function refreshRemoveButtons() {
 }
 
 function updateForm() {
-    const style = $('style-select').value;
-    const typeSel = $('f-type');
-    if (style === 'aacr2') { typeSel.value = 'book'; typeSel.disabled = true; }
-    else { typeSel.disabled = false; }
-    $('type-hint').hidden = style !== 'aacr2';
-    const type = typeSel.value;
+    const type = $('f-type').value;
     document.querySelectorAll('[data-types]').forEach(el => {
         el.hidden = !el.dataset.types.split(' ').includes(type);
     });
-    document.querySelectorAll('[data-style]').forEach(el => {
-        el.hidden = el.dataset.style !== style;
-    });
     $('title-label').textContent = type === 'journal' ? 'Article title' : type === 'website' ? 'Page title' : 'Book title';
     $('link-label').textContent = type === 'website' ? 'Link to the web page (required)' : 'Link or DOI (optional)';
-    $('f-link').placeholder = type === 'website' ? 'Paste the web address here, e.g., https://www.example.com/page' : 'Paste the web link or DOI here, if there is one';
+    $('f-title').placeholder = type === 'journal' ? 'Type the article title' : type === 'website' ? 'Type the page title' : 'Type the book title';
+    $('f-link').placeholder = type === 'website' ? 'Paste the web address of the page here' : 'Paste the web link or DOI here, if there is one';
 }
 
 /* ---------- Title capitalization ----------
@@ -752,8 +689,7 @@ function titleRule(styleKey, type) {
     switch (styleKey) {
         case 'apa-7':    return { mode: 'sentence', capSub: true };
         case 'harvard':  return { mode: 'sentence', capSub: false };
-        case 'vancouver':
-        case 'aacr2':    return { mode: 'sentence', capSub: false };
+        case 'vancouver': return { mode: 'sentence', capSub: false };
         case 'ieee':     return book ? { mode: 'title' } : { mode: 'sentence', capSub: false };
         case 'ama-11':   return book ? { mode: 'title' } : { mode: 'sentence', capSub: true };
         case 'mla-9':
@@ -884,10 +820,7 @@ function readForm() {
     let doi = link.doi, url = link.url;
     if (type === 'website' && doi) { url = 'https://doi.org/' + doi; doi = ''; }
 
-    const book = type === 'book', aacr = $('style-select').value === 'aacr2';
-    let extent = aacr ? g('f-extent') : '', size = aacr ? g('f-size') : '';
-    extent = extent.replace(/^(\d+)\s*(?:p|pp|pages)?\.?$/i, '$1 p.');
-    size = size.replace(/^(\d+(?:\.\d+)?)\s*(?:cm)?\.?$/i, '$1 cm.');
+    const book = type === 'book';
 
     const mainTitle = g('f-title'), subTitle = g('f-subtitle');
     const titleText = formatTitle(joinTitle(mainTitle, subTitle), titleRule($('style-select').value, type));
@@ -903,9 +836,7 @@ function readForm() {
         issue: type === 'journal' ? esc(g('f-issue')) : '',
         pages: type === 'journal' ? esc(g('f-pages')) : '',
         site: type === 'website' ? esc(g('f-site')) : '',
-        doi: esc(doi), url: esc(url), pub, acc,
-        extent: esc(extent), size: esc(size),
-        series: aacr ? esc(g('f-series')) : '', isbn: aacr ? esc(g('f-isbn')) : ''
+        doi: esc(doi), url: esc(url), pub, acc
     };
 }
 
@@ -955,7 +886,7 @@ function generateCitation() {
         '<h4 style="color: #28a745; margin-top: 0;">Complete!</h4>' +
         '<p style="font-size: 13px; color: #666; margin-bottom: 10px;"><strong>Format:</strong> ' + label + '</p>' +
         '<p><strong>Generated Reference:</strong></p>' +
-        '<div id="citation-output" class="citation' + (style.layout === 'card' ? ' citation-card' : '') + '">' + html + '</div>' +
+        '<div id="citation-output" class="citation">' + html + '</div>' +
         '<button type="button" class="btn-small" id="copy-btn" onclick="copyCitation()">Copy citation</button>' +
         (tips ? '<div class="tips">' + tips + '</div>' : '') +
         '<p style="font-size: 13px; color: #475569; margin: 14px 0 4px 0;"><strong>Check before you submit:</strong></p>' +
