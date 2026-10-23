@@ -4,174 +4,86 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MINFO Citation Generator</title>
-    <style>
-    body { 
-        font-family: Arial, sans-serif;
-        margin: 0;                  
-        padding: 40px;               
-        background-color: #ffffff;
-        color: #333; 
-    }
-    header {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        margin-bottom: 20px; 
-    }
-    .logo {
-        width: 80px;
-        height: auto;
-        border-radius: 4px;
-        margin-bottom: 15px; 
-    }
-    .header-text {
-        text-align: center;
-    }
-    .header-text h1 {
-        margin: 0;
-        font-size: 28px;
-    }
-    .header-text p {
-        margin: 5px 0 0 0;
-        color: #666;
-    }
-    .nav-bar {
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-        max-width: 600px;
-        margin: 0 auto 25px auto;
-    }
-    .nav-btn {
-        background-color: #e2e8f0;
-        color: #334155;
-        border: none;
-        padding: 8px 16px;
-        font-size: 14px;
-        font-weight: bold;
-        border-radius: 20px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-    .nav-btn:hover {
-        background-color: #cbd5e1;
-    }
-    .nav-btn.active {
-        background-color: #007bff;
-        color: white;
-    }
-    .container { max-width: 600px; margin: 0 auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 10px #0000001a; }
-    .content-panel {
-        display: none;
-    }
-    .content-panel.active {
-        display: block;
-    }
-    .section { margin-bottom: 20px; }
-    label { font-weight: bold; display: block; margin-bottom: 5px; }
-    input[type="text"], input[type="file"], select, textarea { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-    button { background-color: #007bff; color: white; border: none; padding: 12px 20px; font-size: 16px; border-radius: 4px; cursor: pointer; width: 100%; }
-    button:hover { background-color: #0056b3; }
-    #result-box { margin-top: 20px; padding: 15px; background-color: #f8f8f8; border-left: 5px solid #2c92ff; border-radius: 4px; display: none; }
-    h2 {
-        margin-top: 0;
-        color: #007bff;
-        font-size: 22px;
-        border-bottom: 2px solid #f3f3f3;
-        padding-bottom: 8px;
-    }
-    p {
-        line-height: 1.6;
-        color: #475569;
-    }
-    .team-card {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        padding: 15px 0;
-    }
-    .avatar-placeholder {
-        width: 90px;
-        height: 90px;
-        background-color: #cbd5e1;
-        border-radius: 50%;
-        margin-bottom: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 32px;
-        color: #64748b;
-        font-weight: bold;
-    }
-    .step-block {
-        margin-bottom: 18px;
-    }
-    .step-title {
-        font-weight: bold;
-        color: #1e293b;
-        margin-bottom: 4px;
-    }
-    .contact-link {
-        display: inline-block;
-        background-color: #f1f5f9;
-        color: #007bff;
-        padding: 10px 16px;
-        border-radius: 6px;
-        text-decoration: none;
-        font-weight: bold;
-        margin-right: 10px;
-        margin-bottom: 10px;
-        transition: background 0.2s;
-    }
-    .contact-link:hover {
-        background-color: #e2e8f0;
-    }
-
-    [hidden] { display: none !important; }
-    input[type="date"] { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-family: inherit; font-size: inherit; }
-    button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #007bff; outline-offset: 2px; }
-    .row { display: flex; gap: 10px; }
-    .row > div { flex: 1; min-width: 0; }
-    .author-row, .cat-author-row { display: flex; gap: 8px; align-items: flex-start; }
-    .author-row input[type="text"], .cat-author-row input[type="text"] { margin-bottom: 8px; }
-    .author-row .btn-remove, .cat-author-row .btn-remove { padding: 10px 12px; }
-    .mode-switch { display: flex; gap: 8px; margin-bottom: 20px; }
-    .mode-btn { background-color: #e2e8f0; color: #334155; padding: 10px 8px; font-size: 14px; line-height: 1.3; }
-    .mode-btn:hover { background-color: #cbd5e1; }
-    .mode-btn.active { background-color: #007bff; color: white; }
-    .mode-btn small { display: block; font-size: 11px; font-weight: normal; opacity: 0.9; }
-    .cat-step { border: 1px solid #dbe3ee; border-radius: 6px; padding: 14px 14px 2px 14px; margin: 0 0 18px 0; }
-    .cat-step legend { font-weight: bold; color: #007bff; padding: 0 6px; font-size: 15px; }
-    #cat-result-box { margin-top: 20px; padding: 15px; background-color: #f8f8f8; border-left: 5px solid #2c92ff; border-radius: 4px; display: none; }
-    .cat-record { background: white; border: 1px dashed #bbb; padding: 10px; margin-bottom: 10px; line-height: 1.6; overflow-x: auto; }
-    .cat-card .cat-heading { margin-bottom: 4px; }
-    .cat-card .cat-body { margin-left: 1.5em; }
-    .cat-card .cat-tracing { margin: 8px 0 0 1.5em; }
-    .cat-card .cat-isbn { margin: 8px 0 0 1.5em; }
-    .cat-table { border-collapse: collapse; width: 100%; font-size: 14px; }
-    .cat-table th, .cat-table td { text-align: left; vertical-align: top; padding: 5px 8px; border-bottom: 1px solid #e5e7eb; }
-    .cat-table th { width: 42%; font-weight: bold; color: #334155; }
-    .cat-marc { background: #1e293b; color: #e2e8f0; padding: 10px; border-radius: 4px; font-size: 13px; line-height: 1.5; overflow-x: auto; white-space: pre; margin: 0 0 10px 0; }
-    .btn-small { width: auto; padding: 8px 14px; font-size: 14px; background-color: #e2e8f0; color: #334155; }
-    .btn-small:hover { background-color: #cbd5e1; }
-    .hint { display: block; font-size: 12px; color: #64748b; margin: 6px 0 15px 0; line-height: 1.4; }
-    .citation { background: white; padding: 10px 10px 10px 2.5em; text-indent: -1.5em; border: 1px dashed #bbb; line-height: 1.6; margin-bottom: 10px; }
-    .tips { background: #fff8e1; border-left: 4px solid #f59e0b; padding: 8px 12px; font-size: 13px; color: #78350f; margin-top: 12px; border-radius: 4px; }
-    .notes { font-size: 13px; color: #475569; margin: 0; padding-left: 18px; line-height: 1.5; }
-    @media (max-width: 480px) {
-        body { padding: 20px 12px; }
-        .row { flex-wrap: wrap; gap: 0; }
-        .row > div { flex-basis: 100%; }
-    }
-    </style>
+<script>
+function imgFallback(img) {
+    const next = (img.dataset.fallbacks || '').split('|').filter(Boolean);
+    if (!next.length) { img.onerror = null; return; }
+    img.dataset.fallbacks = next.slice(1).join('|');
+    img.src = next[0];
+}
+</script>
+<style>
+body { font-family: Arial, sans-serif; margin: 0; padding: 40px; background-color: #ffffff; color: #333; }
+header { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 20px; }
+.logo { width: 80px; height: auto; border-radius: 4px; margin-bottom: 15px; }
+.header-text { text-align: center; }
+.header-text h1 { margin: 0; font-size: 28px; }
+.header-text p { margin: 5px 0 0 0; color: #666; }
+.nav-bar { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; max-width: 600px; margin: 0 auto 25px auto; }
+.nav-btn { background-color: #e2e8f0; color: #334155; border: none; padding: 8px 16px; font-size: 14px; font-weight: bold; border-radius: 20px; cursor: pointer; transition: all 0.2s ease; width: auto; }
+.nav-btn:hover { background-color: #cbd5e1; }
+.nav-btn.active { background-color: #007bff; color: white; }
+.container { max-width: 600px; margin: 0 auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 10px #0000001a; }
+.content-panel { display: none; }
+.content-panel.active { display: block; }
+.section { margin-bottom: 20px; }
+label { font-weight: bold; display: block; margin-bottom: 5px; }
+input[type="text"], input[type="date"], select { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+input[type="date"] { font-family: inherit; font-size: inherit; }
+button { background-color: #007bff; color: white; border: none; padding: 12px 20px; font-size: 16px; border-radius: 4px; cursor: pointer; width: 100%; }
+button:hover { background-color: #0056b3; }
+#result-box, #cat-result-box { margin-top: 20px; padding: 15px; background-color: #f8f8f8; border-left: 5px solid #2c92ff; border-radius: 4px; display: none; }
+h2 { margin-top: 0; color: #007bff; font-size: 22px; border-bottom: 2px solid #f3f3f3; padding-bottom: 8px; }
+p { line-height: 1.6; color: #475569; }
+.team-card { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 15px 0; }
+.team-photo { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin-bottom: 12px; border: 2px solid #e2e8f0; }
+.team-name { font-size: 18px; font-weight: bold; color: #1e293b; margin-bottom: 4px; }
+.team-role { font-size: 14px; color: #475569; }
+.team-school { font-size: 14px; color: #64748b; font-style: italic; }
+.step-block { margin-bottom: 18px; }
+.step-title { font-weight: bold; color: #1e293b; margin-bottom: 4px; }
+.contact-link { display: inline-block; background-color: #f1f5f9; color: #007bff; padding: 10px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; margin-right: 10px; margin-bottom: 10px; transition: background 0.2s; }
+.contact-link:hover { background-color: #e2e8f0; }
+[hidden] { display: none !important; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #007bff; outline-offset: 2px; }
+.row { display: flex; gap: 10px; }
+.row > div { flex: 1; min-width: 0; }
+.author-row, .cat-author-row { display: flex; gap: 8px; align-items: flex-start; }
+.author-row input[type="text"], .cat-author-row input[type="text"] { margin-bottom: 8px; }
+.author-row .btn-remove, .cat-author-row .btn-remove { padding: 10px 12px; }
+.mode-switch { display: flex; gap: 8px; margin-bottom: 20px; }
+.mode-btn { background-color: #e2e8f0; color: #334155; padding: 10px 8px; font-size: 14px; line-height: 1.3; }
+.mode-btn:hover { background-color: #cbd5e1; }
+.mode-btn.active { background-color: #007bff; color: white; }
+.mode-btn small { display: block; font-size: 11px; font-weight: normal; opacity: 0.9; }
+.cat-step { border: 1px solid #dbe3ee; border-radius: 6px; padding: 14px 14px 2px 14px; margin: 0 0 18px 0; }
+.cat-step legend { font-weight: bold; color: #007bff; padding: 0 6px; font-size: 15px; }
+.cat-record { background: white; border: 1px dashed #bbb; padding: 10px; margin-bottom: 10px; line-height: 1.6; overflow-x: auto; }
+.cat-card .cat-heading { margin-bottom: 4px; }
+.cat-card .cat-body { margin-left: 1.5em; }
+.cat-card .cat-tracing { margin: 8px 0 0 1.5em; }
+.cat-card .cat-isbn { margin: 8px 0 0 1.5em; }
+.cat-table { border-collapse: collapse; width: 100%; font-size: 14px; }
+.cat-table th, .cat-table td { text-align: left; vertical-align: top; padding: 5px 8px; border-bottom: 1px solid #e5e7eb; }
+.cat-table th { width: 42%; font-weight: bold; color: #334155; }
+.cat-marc { background: #1e293b; color: #e2e8f0; padding: 10px; border-radius: 4px; font-size: 13px; line-height: 1.5; overflow-x: auto; white-space: pre; margin: 0 0 10px 0; }
+.btn-small { width: auto; padding: 8px 14px; font-size: 14px; background-color: #e2e8f0; color: #334155; }
+.btn-small:hover { background-color: #cbd5e1; }
+.hint { display: block; font-size: 12px; color: #64748b; margin: 6px 0 15px 0; line-height: 1.4; }
+.citation { background: white; padding: 10px 10px 10px 2.5em; text-indent: -1.5em; border: 1px dashed #bbb; line-height: 1.6; margin-bottom: 10px; }
+.tips { background: #fff8e1; border-left: 4px solid #f59e0b; padding: 8px 12px; font-size: 13px; color: #78350f; margin-top: 12px; border-radius: 4px; }
+.notes { font-size: 13px; color: #475569; margin: 0; padding-left: 18px; line-height: 1.5; }
+@media (max-width: 480px) {
+    body { padding: 20px 12px; }
+    .row { flex-wrap: wrap; gap: 0; }
+    .row > div { flex-basis: 100%; }
+}
+</style>
 </head>
 <body>
 
 <header>
 <img src="https://drive.google.com/thumbnail?id=1LCybX4v8Bkytw1azbj4I0lu39ulft7-_&amp;sz=w300" data-fallbacks="https://lh3.googleusercontent.com/d/1LCybX4v8Bkytw1azbj4I0lu39ulft7-_|logo.png" onerror="imgFallback(this)" alt="MINFO Logo" class="logo">
-    
     <div class="header-text">
         <h1>MINFO Citation Generator</h1>
         <p>Free Accurate Academic Citation</p>
@@ -212,7 +124,7 @@
         <div class="section">
             <label>Author(s)</label>
             <div id="author-list"></div>
-            <button type="button" class="btn-small" onclick="addAuthorRow()">+ Add author</button>
+            <button type="button" class="btn-small" onclick="addAuthorRow('std')">+ Add author</button>
             <span class="hint">Type the surname and given names in separate boxes. For an organization, type its name in the first box and leave the second empty. No author? Leave them all blank.</span>
         </div>
 
@@ -337,7 +249,7 @@
                 <input type="text" id="c-other" placeholder="Type the subtitle or other title information, if any">
                 <label>Author(s) (for the main and added entries)</label>
                 <div id="cat-author-list"></div>
-                <button type="button" class="btn-small" onclick="addCatAuthorRow()">+ Add author</button>
+                <button type="button" class="btn-small" onclick="addAuthorRow('cat')">+ Add author</button>
                 <span class="hint">Surname and given names go in separate boxes. For an organization, use the first box only. No author? Leave them blank.</span>
                 <label for="c-sor">Statement of responsibility (optional)</label>
                 <input type="text" id="c-sor" placeholder="Type it as it appears on the source">
@@ -409,7 +321,7 @@
     <div id="about-panel" class="content-panel">
         <h2>About MINFO</h2>
         <p>MINFO Citation Generator is a free citation tool that helps users create accurate and properly formatted citations with ease. A Quick Cite Tool (QCT), the name “MINFO” comes from “Mi,” meaning “me,” and “Info,” which is shortened from “information,” 
-        reflecting a personal and accessible approach to managing academic sources. MINFO may also come from the Ministry of Information (MINFO), a cabinet ministry of the micronational government of the <a href="https://arlandicangovernme.wixsite.com/arlandicangovernment" target="_blank" rel="noopener">Kingdom of Arlandica</a>, a nation-building project. The website is built entirely by students in <a href="https://en.wikipedia.org/wiki/Davao_City" target="_blank">Davao City</a>, <a href="https://en.wikipedia.org/wiki/Philippines" target="_blank">Philippines</a>, guided by the principle “By Students, For Students,” solidifying its focus on supporting learners in their academic work.</p>
+        reflecting a personal and accessible approach to managing academic sources. MINFO may also come from the Ministry of Information (MINFO), a cabinet ministry of the micronational government of the <a href="https://arlandicangovernme.wixsite.com/arlandicangovernment" target="_blank" rel="noopener">Kingdom of Arlandica</a>, a nation-building project. The website is built entirely by students in <a href="https://en.wikipedia.org/wiki/Davao_City" target="_blank" rel="noopener">Davao City</a>, <a href="https://en.wikipedia.org/wiki/Philippines" target="_blank" rel="noopener">Philippines</a>, guided by the principle “By Students, For Students,” solidifying its focus on supporting learners in their academic work.</p>
         <p>The platform is designed to be simple and user-friendly, allowing students to generate citations in different formats quickly without needing advanced knowledge of citation styles. It aims to reduce the time and effort required in formatting references, helping users focus more on their research and writing.</p>
     </div>
 
@@ -417,22 +329,19 @@
         <h2>Our Team</h2>
         <p>The team operating MINFO is dedicated to developing and maintaining the platform.</p>
         <div class="team-card">
-            <img src="https://drive.google.com/thumbnail?id=1G2bKs4LDwgXpVMlFl6SuJoyEpgxKhR5c&amp;sz=w300" data-fallbacks="https://lh3.googleusercontent.com/d/1G2bKs4LDwgXpVMlFl6SuJoyEpgxKhR5c|jerold.jpg" onerror="imgFallback(this)" 
-                 alt="Garte, Jerold Jr. L." 
-                 style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin-bottom: 12px; border: 2px solid #e2e8f0;">
-                 
-            <div style="font-size: 18px; font-weight: bold; color: #1e293b; margin-bottom: 4px;">Garte, Jerold Jr. L.</div>
-            <div style="font-size: 14px; color: #475569;">2nd Year Student, Bachelor of Library and Information Science</div>
-            <div style="font-size: 14px; color: #64748b; font-style: italic;">University of Southeastern Philippines</div>
+            <img class="team-photo" src="https://drive.google.com/thumbnail?id=1G2bKs4LDwgXpVMlFl6SuJoyEpgxKhR5c&amp;sz=w300" data-fallbacks="https://lh3.googleusercontent.com/d/1G2bKs4LDwgXpVMlFl6SuJoyEpgxKhR5c|jerold.jpg" onerror="imgFallback(this)" alt="Garte, Jerold Jr. L.">
+            <div class="team-name">Garte, Jerold Jr. L.</div>
+            <div class="team-role">2nd Year Student, Bachelor of Library and Information Science</div>
+            <div class="team-school">University of Southeastern Philippines</div>
         </div>
     </div>
 
     <div id="findout-panel" class="content-panel">
         <h2>Find Out How to Use</h2>
-        
+
         <div class="step-block">
             <div class="step-title"><strong>Step 1: Choose Your Citation Style</strong></div>
-            <p>At the very top, click the dropdown menu under Choose Citation Style. Select the style required for your paper or project. It is currently set to APA 7th, but clicking it will likely reveal other common options like MLA, Chicago, or Harvard.</p>
+            <p>At the very top, click the dropdown menu under Choose Citation Style. Select the style required for your paper or project. It starts on APA 7th. The list has eight choices: APA 7th, MLA 9th, Chicago 17th (Notes &amp; Bibliography and Author-Date), Harvard, IEEE, Vancouver and AMA 11th.</p>
         </div>
 
         <div class="step-block">
@@ -468,12 +377,8 @@
 
 <script>
 function switchTab(panelId, btnElement) {
-    const panels = document.querySelectorAll('.content-panel');
-    panels.forEach(p => p.classList.remove('active'));
-
-    const buttons = document.querySelectorAll('.nav-btn');
-    buttons.forEach(b => b.classList.remove('active'));
-
+    document.querySelectorAll('.content-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     document.getElementById(panelId).classList.add('active');
     btnElement.classList.add('active');
 }
@@ -500,7 +405,7 @@ function ordinal(n) {
 function normEdition(e) {
     e = (e || '').trim();
     if (!e) return '';
-    e = e.replace(/[\s,.]*(edition|edn|ed)\.?$/i, '').trim();
+    e = e.replace(/(?:^|[\s,]+)(?:edition|edn|ed)\.?$/i, '').trim();
     if (/^(1|1st|first)$/i.test(e)) return '';
     if (/^\d+$/.test(e)) return ordinal(+e);
     return e;
@@ -659,12 +564,12 @@ function harvard(S) {
                      link ? 'Available at: ' + link + '.' : '']);
     }
     if (S.type === 'journal') {
-        const t = '‘' + S.title.replace(/[.,]+$/, '') + '’,';
-        const src = em(S.journal) + ', ' + (S.volume || '') + (S.issue ? '(' + S.issue + ')' : '') +
-                    (S.pages ? ', ' + pp(S.pages) + ' ' + pagesEn(S.pages) : '') + '.';
+        const t = '‘' + S.title.replace(/[.,]+$/, '') + '’';
+        const vi = (S.volume || '') + (S.issue ? '(' + S.issue + ')' : '');
+        const src = [em(S.journal), vi, S.pages ? pp(S.pages) + ' ' + pagesEn(S.pages) : ''].filter(Boolean).join(', ') + '.';
         const tail = S.doi ? 'https://doi.org/' + S.doi + '.' : (S.url ? 'Available at: ' + S.url + acc + '.' : '');
-        const head = A ? [A, '(' + yr + ')', t] : [t, '(' + yr + ')'];
-        return join([...head, src.replace(', ,', ','), tail]);
+        const head = A ? [A, '(' + yr + ')', t + ','] : [t, '(' + yr + ')'];
+        return join([...head, src, tail]);
     }
     return join([...lead(end(em(S.title))), link ? 'Available at: ' + link + acc + '.' : '']);
 }
@@ -765,30 +670,43 @@ const STYLES = {
 
 const $ = id => document.getElementById(id);
 
-function imgFallback(img) {
-    const next = (img.dataset.fallbacks || '').split('|').filter(Boolean);
-    if (!next.length) { img.onerror = null; return; }
-    img.dataset.fallbacks = next.slice(1).join('|');
-    img.src = next[0];
-}
-
-function addAuthorRow() {
-    const row = document.createElement('div');
-    row.className = 'author-row';
+/* ---------- Author rows (shared by Standard and Cataloging modes) ---------- */
+const AUTHOR_UI = {
+    std: { list: 'author-list',     row: 'author-row',     last: 'a-last',  given: 'a-given'  },
+    cat: { list: 'cat-author-list', row: 'cat-author-row', last: 'ca-last', given: 'ca-given' }
+};
+function addAuthorRow(k = 'std') {
+    const u = AUTHOR_UI[k], row = document.createElement('div');
+    row.className = u.row;
     row.innerHTML =
-        '<input type="text" class="a-last" placeholder="Author surname (or organization)" aria-label="Author surname or organization">' +
-        '<input type="text" class="a-given" placeholder="Author given names" aria-label="Author given names">' +
-        '<button type="button" class="btn-small btn-remove" aria-label="Remove this author" onclick="removeAuthorRow(this)">&times;</button>';
-    $('author-list').appendChild(row);
-    refreshRemoveButtons();
+        `<input type="text" class="${u.last}" placeholder="Author surname (or organization)" aria-label="Author surname or organization">` +
+        `<input type="text" class="${u.given}" placeholder="Author given names" aria-label="Author given names">` +
+        `<button type="button" class="btn-small btn-remove" aria-label="Remove this author" onclick="removeAuthorRow(this,'${k}')">&times;</button>`;
+    $(u.list).appendChild(row);
+    refreshRemoveButtons(k);
 }
-function removeAuthorRow(btn) {
-    btn.parentNode.remove();
-    refreshRemoveButtons();
-}
-function refreshRemoveButtons() {
-    const rows = document.querySelectorAll('.author-row');
+function removeAuthorRow(btn, k = 'std') { btn.parentNode.remove(); refreshRemoveButtons(k); }
+function refreshRemoveButtons(k = 'std') {
+    const rows = document.querySelectorAll('.' + AUTHOR_UI[k].row);
     rows.forEach(r => { r.querySelector('.btn-remove').hidden = rows.length === 1; });
+}
+function readAuthors(k, clean = s => s) {
+    const u = AUTHOR_UI[k], authors = [];
+    let bad = false;
+    document.querySelectorAll('.' + u.row).forEach(row => {
+        const last = row.querySelector('.' + u.last).value.trim().replace(/\s+/g, ' ');
+        let given = row.querySelector('.' + u.given).value.trim().replace(/\s+/g, ' ');
+        if (!last && !given) return;
+        if (!last) { bad = true; return; }
+        let suffix = '';
+        const sm = /[\s,]+(?:(jr|sr)\.?|(ii|iii|iv))$/i.exec(given);
+        if (sm) {
+            suffix = sm[1] ? sm[1][0].toUpperCase() + sm[1].slice(1).toLowerCase() + '.' : sm[2].toUpperCase();
+            given = given.slice(0, sm.index).trim();
+        }
+        authors.push({ last: clean(last), given: clean(given), suffix: clean(suffix) });
+    });
+    return { authors, bad };
 }
 
 function updateForm() {
@@ -923,21 +841,7 @@ function formatTitle(raw, rule) {
 function readForm() {
     const g = id => ($(id).value || '').trim().replace(/\s+/g, ' ');
     const type = g('f-type');
-    const authors = [];
-    let badAuthor = false;
-    document.querySelectorAll('.author-row').forEach(row => {
-        const last = row.querySelector('.a-last').value.trim().replace(/\s+/g, ' ');
-        let given = row.querySelector('.a-given').value.trim().replace(/\s+/g, ' ');
-        if (!last && !given) return;
-        if (!last) { badAuthor = true; return; }
-        let suffix = '';
-        const sm = /[\s,]+(?:(jr|sr)\.?|(ii|iii|iv))$/i.exec(given);
-        if (sm) {
-            suffix = sm[1] ? sm[1].charAt(0).toUpperCase() + sm[1].slice(1).toLowerCase() + '.' : sm[2].toUpperCase();
-            given = given.slice(0, sm.index).trim();
-        }
-        authors.push({ last: esc(last), given: esc(given), suffix: esc(suffix) });
-    });
+    const { authors, bad: badAuthor } = readAuthors('std', esc);
 
     const yearRaw = type === 'book' ? g('f-year-b') : type === 'journal' ? g('f-year-j') : '';
     let pub = null, acc = null;
@@ -988,7 +892,6 @@ function tipsFor(S) {
     return msg;
 }
 
-let copyTimer;
 function generateCitation() {
     const outputBox = $('result-box');
     outputBox.style.display = 'block';
@@ -1026,8 +929,8 @@ async function copyCitation(outId, btnId) {
     const orig = btn.dataset.label || 'Copy citation';
     const flash = msg => {
         btn.textContent = msg;
-        clearTimeout(copyTimer);
-        copyTimer = setTimeout(() => { btn.textContent = orig; }, 2000);
+        clearTimeout(btn._t);
+        btn._t = setTimeout(() => { btn.textContent = orig; }, 2000);
     };
     try {
         if (!(window.ClipboardItem && navigator.clipboard && navigator.clipboard.write)) throw new Error('rich copy unavailable');
@@ -1057,21 +960,7 @@ function setMode(mode) {
     $('mode-btn-standard').setAttribute('aria-pressed', String(!cat));
     $('mode-btn-catalog').setAttribute('aria-pressed', String(cat));
 }
-function addCatAuthorRow() {
-    const row = document.createElement('div');
-    row.className = 'cat-author-row';
-    row.innerHTML =
-        '<input type="text" class="ca-last" placeholder="Author surname (or organization)" aria-label="Author surname or organization">' +
-        '<input type="text" class="ca-given" placeholder="Author given names" aria-label="Author given names">' +
-        '<button type="button" class="btn-small btn-remove" aria-label="Remove this author" onclick="removeCatAuthorRow(this)">&times;</button>';
-    $('cat-author-list').appendChild(row);
-    refreshCatRemove();
-}
-function removeCatAuthorRow(btn) { btn.parentNode.remove(); refreshCatRemove(); }
-function refreshCatRemove() {
-    const rows = document.querySelectorAll('.cat-author-row');
-    rows.forEach(r => { r.querySelector('.btn-remove').hidden = rows.length === 1; });
-}
+
 function updateCatalogForm() {
     const type = $('c-type').value, medium = $('c-medium').value;
     document.querySelectorAll('[data-ctypes]').forEach(el => {
@@ -1086,22 +975,15 @@ function updateCatalogForm() {
 
 function readCatalogForm() {
     const g = id => ($(id).value || '').trim().replace(/\s+/g, ' ');
-    const authors = [];
-    let badAuthor = false;
-    document.querySelectorAll('.cat-author-row').forEach(row => {
-        const last = row.querySelector('.ca-last').value.trim().replace(/\s+/g, ' ');
-        const given = row.querySelector('.ca-given').value.trim().replace(/\s+/g, ' ');
-        if (!last && !given) return;
-        if (!last) { badAuthor = true; return; }
-        authors.push({ last, given, suffix: '' });
-    });
+    const { authors, bad: badAuthor } = readAuthors('cat');
     return {
         std: g('c-std'), type: g('c-type'), medium: g('c-medium'),
         title: g('c-title'), other: g('c-other'), sor: g('c-sor'), authors, badAuthor,
         edition: g('c-edition'), numbering: g('c-numbering'),
         place: g('c-place'), publisher: g('c-publisher'), date: g('c-date'),
         extent: g('c-extent'), details: g('c-details'), dims: g('c-dims'),
-        series: g('c-series'), seriesNo: g('c-seriesno'), id: g('c-id'), url: g('c-url')
+        series: g('c-series'), seriesNo: g('c-seriesno'), id: g('c-id'),
+        url: g('c-medium') === 'online' ? g('c-url') : ''
     };
 }
 
@@ -1229,12 +1111,12 @@ function buildCatalogRecord(C) {
     } else {
         tp = formatTitle(tp, rule);
     }
-    const series = C.series ? formatTitle(C.series, TITLE_RULE) : '';
+    const series = C.series ? formatTitle(C.series, rule) : '';
     const seriesNo = series ? C.seriesNo : '';
 
     const A = C.authors, n = A.length;
-    const main = rda ? (n ? A[0] : null) : (n >= 1 && n <= 3 ? A[0] : null);
-    const added = rda ? A.slice(1) : (n >= 2 && n <= 3 ? A.slice(1) : (n > 3 ? [A[0]] : []));
+    const main = serial ? null : (rda ? (n ? A[0] : null) : (n >= 1 && n <= 3 ? A[0] : null));
+    const added = serial ? A : (rda ? A.slice(1) : (n >= 2 && n <= 3 ? A.slice(1) : (n > 3 ? [A[0]] : [])));
 
     let sor = C.sor;
     if (!sor && n) {
@@ -1413,6 +1295,7 @@ function generateCatalog(force) {
     checks.push('Check names against your authority file. A corporate body is a main entry only for certain kinds of work.');
     checks.push('Subject headings, classification, call number and fixed fields are not made here. Add them in your library system.');
     checks.push('Initial articles in the title are assumed to be English (the, a, an) when setting the non-filing characters.');
+    if (C.type === 'serial') checks.push('Serials are entered under title here; any authors typed are added entries. Change this if the serial belongs under a corporate body.');
     box.innerHTML =
         '<h4 style="color: #28a745; margin-top: 0;">Record ready</h4>' +
         '<p style="font-size: 13px; color: #666; margin-bottom: 10px;"><strong>Format:</strong> ' + esc(R.label) + '</p>' +
@@ -1436,9 +1319,9 @@ function generateCatalog(force) {
         if (key === 'apa-7') opt.selected = true;
         sel.appendChild(opt);
     });
-    addAuthorRow();
+    addAuthorRow('std');
     updateForm();
-    addCatAuthorRow();
+    addAuthorRow('cat');
     updateCatalogForm();
 })();
 </script>
